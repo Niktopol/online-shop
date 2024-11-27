@@ -76,7 +76,7 @@ public class Security {
                 .authorizeHttpRequests(request ->
                         request.requestMatchers("/auth/signin", "/auth/signup").anonymous()
                                 .requestMatchers("/graphql/").hasAnyAuthority("CUSTOMER", "OWNER")
-                                .anyRequest().authenticated())
+                                .anyRequest().permitAll())
                 .exceptionHandling(e -> e.accessDeniedHandler(
                         (request, response, accessDeniedException) -> {
                             response.setContentType(MediaType.TEXT_PLAIN_VALUE);
