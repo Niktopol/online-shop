@@ -1,18 +1,67 @@
-#type Car {
-#    id: Int!
-#    title: String!
-#    brand: String!
-#    price: Float!
-#    age: Int!
-#}
+type Good{
+    id: Int!
+    name: String!
+    price: Float!
+    amount: Int!
+    canBeSold: Boolean!
+}
 
-#type Query {
-#    getAllCars: [Car!]!
-#    getCarById(id: Int!): Car
-#}
+input GoodAdd{
+    name: String!
+    price: Float!
+}
 
-#type Mutation {
-#    addCar(title: String!, brand: String!, price: Float!, age: Int!): Car
-#    updateCar(id: Int!, title: String, brand: String, price: Float, age: Int): Car
-#    deleteCar(id: Int!): String
-#}
+input AlterGood{
+    id: Int!
+    name: String
+    price: Float
+    amount: Int
+    canBeSold: Boolean
+}
+
+input GoodAmount{
+    goodId: Int!
+    amount: Int!
+}
+
+type OrderGood{
+    id: Int!
+    name: String!
+    price: Float!
+    amount: Int!
+}
+
+type Order{
+    goods: [OrderGood!]
+    status: Int!
+    price: Float!
+}
+
+input OrderStatus{
+    orderId: Int!
+    status: Int!
+}
+
+type OperationResult{
+    status: Int!
+    desc: String!
+}
+
+type Query{
+    getGoodsList: [Good!]
+    getGood(id: Int!): Good
+    findGoods(name: String!): [Good!]
+    getUserOrders(id: Int!, status: Int): [Order]
+    getOrders(status: Int): [Order!]
+    getCart: [Good!]
+}
+
+type Mutation{
+    addGood(goods: [GoodAdd!]): OperationResult!
+    alterGood(goods: [AlterGood!]): OperationResult!
+    addGoodsToCart(id: [Int!]): OperationResult!
+    delGoodsFromCart(id: [Int!]): OperationResult!
+    alterCartGoodAmount(good: [GoodAmount!]): OperationResult!
+    setOrderStatus(order: OrderStatus): OperationResult!
+    createOrder: OperationResult!
+}

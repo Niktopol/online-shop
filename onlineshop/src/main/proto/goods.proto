@@ -12,6 +12,8 @@ service GoodsService {
     rpc GetGoodsList (google.protobuf.Empty) returns (stream Good) {}
     rpc GetGood (Id) returns (Good) {}
     rpc FindGoods (Name) returns (stream Good) {}
-    rpc AddGood (stream GoodAddInfo) returns (StringResponse) {}
-    rpc AlterGood (stream GoodAlterInfo) returns (StringResponse) {}
+    rpc AddGood (GoodAddInfo) returns (StringResponse) {}
+    rpc AddGoods (stream GoodAddInfo) returns (StringResponse) {}
+    rpc AlterGood (GoodAlterInfo) returns (StringResponse) {}
+    rpc AlterGoods (stream GoodAlterInfo) returns (StringResponse) {}
 }
