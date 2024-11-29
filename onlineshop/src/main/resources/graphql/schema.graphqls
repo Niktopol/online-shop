@@ -1,0 +1,18 @@
+#type Car {
+#    id: Int!
+#    title: String!
+#    brand: String!
+#    price: Float!
+#    age: Int!
+#}
+
+#type Query {
+#    getAllCars: [Car!]!
+#    getCarById(id: Int!): Car
+#}
+
+#type Mutation {
+#    addCar(title: String!, brand: String!, price: Float!, age: Int!): Car
+#    updateCar(id: Int!, title: String, brand: String, price: Float, age: Int): Car
+#    deleteCar(id: Int!): String
+#}

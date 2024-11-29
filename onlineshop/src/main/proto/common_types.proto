@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.example.types";
+option java_outer_classname = "CommonTypesProto";
+
+message Id{
+  int64 id = 1;
+}
+
+message Good{
+  int64 id = 1;
+  string name = 2;
+  double price = 3;
+  int32 amount = 4;
+  bool canBeSold = 5;
+}
+
+message StringResponse {
+  string response = 1;
+  int32 responseCode = 2;
+}
