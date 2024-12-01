@@ -26,6 +26,7 @@ message Order{
   int64 id = 1;
   int64 order_status = 2;
   double price = 3;
+  repeated OrderGood goods = 4;
 }
 
 message CreateOrderInfo{

@@ -75,14 +75,21 @@ public class Security {
                 }))
                 .authorizeHttpRequests(request ->
                         request.requestMatchers("/auth/signin", "/auth/signup").anonymous()
-                                .requestMatchers("/graphql/").hasAnyAuthority("CUSTOMER", "OWNER")
+                                .requestMatchers("/shop").hasAnyAuthority("OWNER", "CUSTOMER")
                                 .anyRequest().permitAll())
-                .exceptionHandling(e -> e.accessDeniedHandler(
+                .exceptionHandling(e -> e
+                        .accessDeniedHandler(
                         (request, response, accessDeniedException) -> {
                             response.setContentType(MediaType.TEXT_PLAIN_VALUE);
                             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                             response.getWriter().write("Access denied");
-                }))
+                        })
+                        .authenticationEntryPoint((request, response, accessDeniedException) -> {
+                            response.setContentType(MediaType.TEXT_PLAIN_VALUE);
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.getWriter().write("Access denied");
+                        })
+                )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                 .logout(logout ->

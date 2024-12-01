@@ -16,7 +16,6 @@ service OrdersService {
   rpc AlterCartGoodAmount (GoodAmountInfo) returns (StringResponse) {}
   rpc AlterCartGoodsAmount (stream GoodAmountInfo) returns (StringResponse) {}
   rpc GetUserOrders (Id) returns (stream Order) {}
-  rpc GetOrderGoods (Id) returns (stream OrderGood) {}
   rpc SetOrderStatus (OrderStatus) returns (StringResponse) {}
   rpc CreateOrder (CreateOrderInfo) returns (StringResponse) {}
 }

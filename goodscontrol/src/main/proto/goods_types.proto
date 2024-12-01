@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.example.types";
+option java_outer_classname = "GoodTypesProto";
+
+message Name{
+  string name = 1;
+}
+
+message GoodAddInfo{
+  string name = 1;
+  double price = 2;
+}
+
+message GoodAlterInfo{
+  int64 id = 1;
+  optional string name = 2;
+  optional double price = 3;
+  optional int32 amount = 4;
+  optional bool canBeSold = 5;
+}

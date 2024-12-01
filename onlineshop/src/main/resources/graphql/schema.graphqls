@@ -48,20 +48,20 @@ type OperationResult{
 }
 
 type Query{
-    getGoodsList: [Good!]
-    getGood(id: Int!): Good
-    findGoods(name: String!): [Good!]
-    getUserOrders(id: Int!, status: Int): [Order]
-    getOrders(status: Int): [Order!]
-    getCart: [Good!]
+    getGoodsList: [Good!]!
+    getGood(id: Int!): Good!
+    findGoods(name: String!): [Good!]!
+    getUserOrders(id: Int!, status: Int): [Order]!
+    getOrders(status: Int): [Order!]!
+    getCart: [Good!]!
 }
 
 type Mutation{
-    addGood(goods: [GoodAdd!]): OperationResult!
-    alterGood(goods: [AlterGood!]): OperationResult!
-    addGoodsToCart(id: [Int!]): OperationResult!
-    delGoodsFromCart(id: [Int!]): OperationResult!
-    alterCartGoodAmount(good: [GoodAmount!]): OperationResult!
+    addGood(goods: [GoodAdd!]!): OperationResult!
+    alterGood(goods: [AlterGood!]!): OperationResult!
+    addGoodsToCart(id: [Int!]!): OperationResult!
+    delGoodsFromCart(id: [Int!]!): OperationResult!
+    alterCartGoodAmount(good: [GoodAmount!]!): OperationResult!
     setOrderStatus(order: OrderStatus): OperationResult!
     createOrder: OperationResult!
 }

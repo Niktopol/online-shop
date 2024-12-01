@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "common_types.proto";
+import "goods_types.proto";
+
+option java_multiple_files = true;
+option java_package = "com.example.goods";
+option java_outer_classname = "GoodsProto";
+
+service GoodsService {
+    rpc GetGoodsList (google.protobuf.Empty) returns (stream Good) {}
+    rpc GetGood (Id) returns (Good) {}
+    rpc FindGoods (Name) returns (stream Good) {}
+    rpc AddGood (GoodAddInfo) returns (StringResponse) {}
+    rpc AddGoods (stream GoodAddInfo) returns (StringResponse) {}
+    rpc AlterGood (GoodAlterInfo) returns (StringResponse) {}
+    rpc AlterGoods (stream GoodAlterInfo) returns (StringResponse) {}
+}

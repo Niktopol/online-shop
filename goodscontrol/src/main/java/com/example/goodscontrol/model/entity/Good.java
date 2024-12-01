@@ -18,7 +18,7 @@ public class Good {
     @Version
     private Long version;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String name;
 
     @Column(nullable = false)
