@@ -22,17 +22,17 @@ public class GoodsController {
 
     @QueryMapping
     List<GoodDTO> getGoodsList(){
-        return service.getGoodsList();
+        return service.getGoodsList().join();
     }
 
     @QueryMapping
     GoodDTO getGood(@Argument Long id){
-        return service.getGood(id);
+        return service.getGood(id).join();
     }
 
     @QueryMapping
     List<GoodDTO> findGoods(@Argument String name){
-        return service.findGoods(name);
+        return service.findGoods(name).join();
     }
 
     @PreAuthorize("hasAuthority('OWNER')")

@@ -7,42 +7,21 @@ import com.example.onlineshop.model.dto.GoodDTO;
 import com.example.onlineshop.model.dto.OperationResultDTO;
 import com.example.types.*;
 import com.google.protobuf.Empty;
-import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Component
 public class GoodsService {
     @GrpcClient("goods")
-    GoodsServiceGrpc.GoodsServiceBlockingStub bstub;
-    @GrpcClient("goods")
-    GoodsServiceGrpc.GoodsServiceStub astub;
+    GoodsServiceGrpc.GoodsServiceStub stub;
 
-    public List<GoodDTO> getGoodsList(){
-        try{
-            Iterator<Good> goods = bstub.getGoodsList(Empty.getDefaultInstance());
-            List<GoodDTO> goodsInfo = new ArrayList<>();
-
-            while (goods.hasNext()){
-                Good good = goods.next();
-                goodsInfo.add(new GoodDTO(good.getId(), good.getName(), good.getPrice(), good.getAmount(), good.getCanBeSold()));
-            }
-
-            return goodsInfo;
-        } catch (StatusRuntimeException e) {
-            throw e;
-        } catch (Exception e){
-            throw new RuntimeException("Unexpected error");
-        }
-
-        /*CompletableFuture<List<GoodDTO>> future = new CompletableFuture<>();
+    public CompletableFuture<List<GoodDTO>> getGoodsList(){
+        CompletableFuture<List<GoodDTO>> future = new CompletableFuture<>();
         List<GoodDTO> goods = new ArrayList<>();
 
         stub.getGoodsList(Empty.getDefaultInstance(), new StreamObserver<Good>() {
@@ -62,19 +41,11 @@ public class GoodsService {
             }
         });
 
-        return future;*/
+        return future;
     }
 
-    public GoodDTO getGood(Long id){
-        try{
-            Good good = bstub.getGood(Id.newBuilder().setId(id).build());
-            return new GoodDTO(good.getId(), good.getName(), good.getPrice(), good.getAmount(), good.getCanBeSold());
-        } catch (StatusRuntimeException e) {
-            throw e;
-        } catch (Exception e){
-            throw new RuntimeException("Unexpected error");
-        }
-        /*CompletableFuture<GoodDTO> future = new CompletableFuture<>();
+    public CompletableFuture<GoodDTO> getGood(Long id){
+        CompletableFuture<GoodDTO> future = new CompletableFuture<>();
         final GoodDTO[] goodOut = new GoodDTO[1];
 
         stub.getGood(Id.newBuilder().setId(id).build(), new StreamObserver<Good>() {
@@ -93,26 +64,11 @@ public class GoodsService {
                 future.complete(goodOut[0]);
             }
         });
-        return future;*/
+        return future;
     }
 
-    public List<GoodDTO> findGoods(String name){
-        try{
-            Iterator<Good> goods = bstub.findGoods(Name.newBuilder().setName(name).build());
-            List<GoodDTO> goodsInfo = new ArrayList<>();
-
-            while (goods.hasNext()){
-                Good good = goods.next();
-                goodsInfo.add(new GoodDTO(good.getId(), good.getName(), good.getPrice(), good.getAmount(), good.getCanBeSold()));
-            }
-
-            return goodsInfo;
-        } catch (StatusRuntimeException e) {
-            throw e;
-        } catch (Exception e){
-            throw new RuntimeException("Unexpected error");
-        }
-        /*CompletableFuture<List<GoodDTO>> future = new CompletableFuture<>();
+    public CompletableFuture<List<GoodDTO>> findGoods(String name){
+        CompletableFuture<List<GoodDTO>> future = new CompletableFuture<>();
         List<GoodDTO> goods = new ArrayList<>();
 
         stub.findGoods(Name.newBuilder().setName(name).build(), new StreamObserver<Good>() {
@@ -132,7 +88,7 @@ public class GoodsService {
             }
         });
 
-        return future;*/
+        return future;
     }
 
     public CompletableFuture<OperationResultDTO> addGoods(List<GoodAddDTO> goods){
@@ -156,7 +112,7 @@ public class GoodsService {
             }
         };
 
-        final StreamObserver<GoodAddInfo> request = astub.addGoods(responseObserver);
+        final StreamObserver<GoodAddInfo> request = stub.addGoods(responseObserver);
         goods.stream()
                 .map((dto) -> GoodAddInfo.newBuilder().setName(dto.getName()).setPrice(dto.getPrice()).build())
                 .forEach(request::onNext);
@@ -186,7 +142,7 @@ public class GoodsService {
             }
         };
 
-        astub.addGood(GoodAddInfo.newBuilder().setName(good.getName()).setPrice(good.getPrice()).build(), responseObserver);
+        stub.addGood(GoodAddInfo.newBuilder().setName(good.getName()).setPrice(good.getPrice()).build(), responseObserver);
         return future;
     }
 
@@ -229,7 +185,7 @@ public class GoodsService {
             }
         };
 
-        final StreamObserver<GoodAlterInfo> request = astub.alterGoods(responseObserver);
+        final StreamObserver<GoodAlterInfo> request = stub.alterGoods(responseObserver);
         goods.stream()
                 .map(this::constructGoodAlterInfo)
                 .forEach(request::onNext);
@@ -259,7 +215,7 @@ public class GoodsService {
             }
         };
 
-        astub.alterGood(constructGoodAlterInfo(good), responseObserver);
+        stub.alterGood(constructGoodAlterInfo(good), responseObserver);
         return future;
     }
 }
