@@ -122,7 +122,6 @@ public class GoodsService extends GoodsServiceGrpc.GoodsServiceImplBase {
                             "List contains good with a name that already exists").asRuntimeException());
                     return;
                 } catch (Exception e){
-                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                     responseObserver.onError(Status.INTERNAL.withDescription("Unknown error").asRuntimeException());
                     return;
                 }

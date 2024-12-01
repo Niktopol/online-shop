@@ -1,9 +1,11 @@
-package com.example.goodscontrol.model.entity;
+package com.example.ordercontrol.model.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @NoArgsConstructor
 @Getter
@@ -35,4 +37,10 @@ public class User {
 
     @Column(nullable = false)
     boolean enabled;
+
+    @OneToMany(mappedBy = "user")
+    private List<CartGood> cart;
+
+    @OneToMany(mappedBy = "user")
+    private List<Order> orders;
 }

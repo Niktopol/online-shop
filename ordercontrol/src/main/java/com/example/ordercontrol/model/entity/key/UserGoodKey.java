@@ -1,4 +1,4 @@
-package com.example.goodscontrol.model.entity.key;
+package com.example.ordercontrol.model.entity.key;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
