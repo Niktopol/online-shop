@@ -37,10 +37,4 @@ public class User {
 
     @Column(nullable = false)
     boolean enabled;
-
-    @OneToMany(mappedBy = "user")
-    private List<CartGood> cart;
-
-    @OneToMany(mappedBy = "user")
-    private List<Order> orders;
 }

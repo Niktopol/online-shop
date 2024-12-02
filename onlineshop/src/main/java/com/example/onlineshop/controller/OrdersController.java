@@ -47,10 +47,7 @@ public class OrdersController {
     public String addGoodsToCart(@Argument List<Long> ids){
         if(ids.isEmpty()){
             throw new EmptyListException("Provided list must contain elements");
-        } else if (ids.size() == 1) {
-            CompletableFuture<String> future = service.addGoodToCart(ids.get(0));
-            return future.join();
-        }else{
+        } else {
             CompletableFuture<String> future = service.addGoodsToCart(ids);
             return future.join();
         }
@@ -61,10 +58,7 @@ public class OrdersController {
     public String delGoodsFromCart(@Argument List<Long> ids){
         if(ids.isEmpty()){
             throw new EmptyListException("Provided list must contain elements");
-        } else if (ids.size() == 1) {
-            CompletableFuture<String> future = service.delGoodFromCart(ids.get(0));
-            return future.join();
-        }else{
+        } else{
             CompletableFuture<String> future = service.delGoodsFromCart(ids);
             return future.join();
         }
@@ -75,10 +69,7 @@ public class OrdersController {
     public String alterCartGoodAmounts(@Argument List<GoodAmountDTO> goods){
         if(goods.isEmpty()){
             throw new EmptyListException("Provided list must contain elements");
-        } else if (goods.size() == 1) {
-            CompletableFuture<String> future = service.alterCartGoodAmount(goods.get(0));
-            return future.join();
-        }else{
+        } else{
             CompletableFuture<String> future = service.alterCartGoodsAmount(goods);
             return future.join();
         }

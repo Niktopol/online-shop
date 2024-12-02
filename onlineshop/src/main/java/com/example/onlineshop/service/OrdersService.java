@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -25,22 +24,27 @@ public class OrdersService {
 
     public CompletableFuture<List<OrderDTO>> getOrders() {
         CompletableFuture<List<OrderDTO>> future = new CompletableFuture<>();
-        List<OrderDTO> orders = new ArrayList<>();
 
         astub.getUserOrders(Id.newBuilder().setId(
                 userRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName()).get().getId()).build(),
-                new StreamObserver<Order>() {
+                new StreamObserver<OrderList>() {
+                    List<OrderDTO> orders;
                     @Override
-                    public void onNext(Order order) {
-                        orders.add(new OrderDTO(order.getId(),
-                                order.getGoodsList().stream().map(ordg -> new OrderGoodDTO(
-                                        new GoodDTO(ordg.getGood().getId(), ordg.getGood().getName(),
-                                                ordg.getGood().getPrice(), ordg.getGood().getAmount(),
-                                                ordg.getGood().getCanBeSold()),
-                                        ordg.getPrice(),
-                                        ordg.getAmount())).toList(),
-                                order.getOrderStatus(),
-                                order.getPrice()));
+                    public void onNext(OrderList orderList) {
+                        orders = orderList.getOrdersList().stream().map(ord -> new OrderDTO(
+                                ord.getId(),
+                                ord.getGoodsList().stream().map(ordG -> new OrderGoodDTO(
+                                        new GoodDTO(ordG.getGood().getId(),
+                                                ordG.getGood().getName(),
+                                                ordG.getGood().getPrice(),
+                                                ordG.getGood().getAmount(),
+                                                ordG.getGood().getCanBeSold()),
+                                        ordG.getPrice(),
+                                        ordG.getAmount()
+                                )).toList(),
+                                ord.getOrderStatus(),
+                                ord.getPrice()
+                        )).toList();
                     }
 
                     @Override
@@ -52,31 +56,34 @@ public class OrdersService {
                     public void onCompleted() {
                         future.complete(orders);
                     }
-        });
+                });
 
         return future;
     }
 
     public CompletableFuture<List<OrderAndUserDTO>> getOrdersByStatus(Integer status_min, Integer status_max) {
         CompletableFuture<List<OrderAndUserDTO>> future = new CompletableFuture<>();
-        List<OrderAndUserDTO> orders = new ArrayList<>();
 
-        astub.getOrdersByStatus(StatusWindow.newBuilder()
-                        .setOrderStatusMin(status_min)
-                        .setOrderStatusMax(status_max).build(),
-                new StreamObserver<OrderAndUser>() {
+        astub.getOrdersByStatus(StatusWindow.newBuilder().setOrderStatusMin(status_min).setOrderStatusMax(status_max).build(),
+                new StreamObserver<OrderAndUserList>() {
+                    List<OrderAndUserDTO> orders;
                     @Override
-                    public void onNext(OrderAndUser order) {
-                        orders.add(new OrderAndUserDTO(order.getId(),
-                                order.getGoodsList().stream().map(ordg -> new OrderGoodDTO(
-                                        new GoodDTO(ordg.getGood().getId(), ordg.getGood().getName(),
-                                                ordg.getGood().getPrice(), ordg.getGood().getAmount(),
-                                                ordg.getGood().getCanBeSold()),
-                                        ordg.getPrice(),
-                                        ordg.getAmount())).toList(),
-                                order.getOrderStatus(),
-                                order.getPrice(),
-                                order.getUserId()));
+                    public void onNext(OrderAndUserList orderList) {
+                        orders = orderList.getOrdersList().stream().map(ord -> new OrderAndUserDTO(
+                                ord.getId(),
+                                ord.getGoodsList().stream().map(ordG -> new OrderGoodDTO(
+                                        new GoodDTO(ordG.getGood().getId(),
+                                                ordG.getGood().getName(),
+                                                ordG.getGood().getPrice(),
+                                                ordG.getGood().getAmount(),
+                                                ordG.getGood().getCanBeSold()),
+                                        ordG.getPrice(),
+                                        ordG.getAmount()
+                                )).toList(),
+                                ord.getOrderStatus(),
+                                ord.getPrice(),
+                                ord.getUserId()
+                        )).toList();
                     }
 
                     @Override
@@ -95,22 +102,22 @@ public class OrdersService {
 
     public CompletableFuture<List<CartGoodDTO>> getCart() {
         CompletableFuture<List<CartGoodDTO>> future = new CompletableFuture<>();
-        List<CartGoodDTO> goods = new ArrayList<>();
 
         astub.getCartGoods(Id.newBuilder().setId(
                         userRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName()).get().getId()).build(),
-                new StreamObserver<CartGood>() {
+                new StreamObserver<CartGoodList>() {
+                    List<CartGoodDTO> cart;
                     @Override
-                    public void onNext(CartGood cartGood) {
-                        goods.add(new CartGoodDTO(
-                                new GoodDTO(
-                                        cartGood.getGood().getId(),
-                                        cartGood.getGood().getName(),
-                                        cartGood.getGood().getPrice(),
-                                        cartGood.getGood().getAmount(),
-                                        cartGood.getGood().getCanBeSold()),
-                                cartGood.getAmount()
-                        ));
+                    public void onNext(CartGoodList goods) {
+                        cart = goods.getGoodsList().stream().map(
+                                good -> new CartGoodDTO(
+                                        new GoodDTO(
+                                                good.getGood().getId(),
+                                                good.getGood().getName(),
+                                                good.getGood().getPrice(),
+                                                good.getGood().getAmount(),
+                                                good.getGood().getCanBeSold()),
+                                        good.getAmount())).toList();
                     }
 
                     @Override
@@ -120,7 +127,7 @@ public class OrdersService {
 
                     @Override
                     public void onCompleted() {
-                        future.complete(goods);
+                        future.complete(cart);
                     }
                 });
         return future;
@@ -147,43 +154,17 @@ public class OrdersService {
         };
     }
 
-    public CompletableFuture<String> addGoodToCart(Long id) {
-        CompletableFuture<String> future = new CompletableFuture<>();
-
-        final StreamObserver<StringResponse> responseObserver = getStringResponseStreamObserver(future);
-
-        astub.addCartGood(ManageGoodInfo.newBuilder()
-                        .setUserId(userRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName()).get().getId())
-                        .setGoodId(id).build(),
-                responseObserver);
-        return future;
-    }
 
     public CompletableFuture<String> addGoodsToCart(List<Long> ids) {
         CompletableFuture<String> future = new CompletableFuture<>();
 
         final StreamObserver<StringResponse> responseObserver = getStringResponseStreamObserver(future);
+        Long userId = userRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName()).get().getId();
 
-        final StreamObserver<ManageGoodInfo> request = astub.addCartGoods(responseObserver);
-        ids.stream()
-                .map(id -> ManageGoodInfo.newBuilder()
-                        .setUserId(userRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName()).get().getId())
-                        .setGoodId(id).build())
-                .forEach(request::onNext);
-        request.onCompleted();
+        astub.addCartGoods(ManageGoodInfoList.newBuilder().addAllInfos(ids.stream().map(id -> ManageGoodInfo.newBuilder()
+                .setUserId(userId)
+                .setGoodId(id).build()).toList()).build(), responseObserver);
 
-        return future;
-    }
-
-    public CompletableFuture<String> delGoodFromCart(Long id) {
-        CompletableFuture<String> future = new CompletableFuture<>();
-
-        final StreamObserver<StringResponse> responseObserver = getStringResponseStreamObserver(future);
-
-        astub.deleteCartGood(ManageGoodInfo.newBuilder()
-                        .setUserId(userRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName()).get().getId())
-                        .setGoodId(id).build(),
-                responseObserver);
         return future;
     }
 
@@ -191,28 +172,12 @@ public class OrdersService {
         CompletableFuture<String> future = new CompletableFuture<>();
 
         final StreamObserver<StringResponse> responseObserver = getStringResponseStreamObserver(future);
+        Long userId = userRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName()).get().getId();
 
-        final StreamObserver<ManageGoodInfo> request = astub.deleteCartGoods(responseObserver);
-        ids.stream()
-                .map(id -> ManageGoodInfo.newBuilder()
-                        .setUserId(userRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName()).get().getId())
-                        .setGoodId(id).build())
-                .forEach(request::onNext);
-        request.onCompleted();
+        astub.deleteCartGoods(ManageGoodInfoList.newBuilder().addAllInfos(ids.stream().map(id -> ManageGoodInfo.newBuilder()
+                .setUserId(userId)
+                .setGoodId(id).build()).toList()).build(), responseObserver);
 
-        return future;
-    }
-
-    public CompletableFuture<String> alterCartGoodAmount(GoodAmountDTO good) {
-        CompletableFuture<String> future = new CompletableFuture<>();
-
-        final StreamObserver<StringResponse> responseObserver = getStringResponseStreamObserver(future);
-
-        astub.alterCartGoodAmount(GoodAmountInfo.newBuilder()
-                        .setUserId(userRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName()).get().getId())
-                        .setGoodId(good.getGoodId())
-                        .setAmount(good.getAmount()).build(),
-                responseObserver);
         return future;
     }
 
@@ -220,15 +185,12 @@ public class OrdersService {
         CompletableFuture<String> future = new CompletableFuture<>();
 
         final StreamObserver<StringResponse> responseObserver = getStringResponseStreamObserver(future);
+        Long userId = userRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName()).get().getId();
 
-        final StreamObserver<GoodAmountInfo> request = astub.alterCartGoodsAmount(responseObserver);
-        goods.stream()
-                .map(good -> GoodAmountInfo.newBuilder()
-                        .setUserId(userRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName()).get().getId())
-                        .setGoodId(good.getGoodId())
-                        .setAmount(good.getAmount()).build())
-                .forEach(request::onNext);
-        request.onCompleted();
+        astub.alterCartGoodsAmount(GoodAmountInfoList.newBuilder().addAllInfos(goods.stream().map(good -> GoodAmountInfo.newBuilder()
+                .setUserId(userId)
+                .setGoodId(good.getGoodId())
+                .setAmount(good.getAmount()).build()).toList()).build(), responseObserver);
 
         return future;
     }

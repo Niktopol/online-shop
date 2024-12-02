@@ -14,6 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,271 +28,123 @@ public class OrderService extends OrdersServiceGrpc.OrdersServiceImplBase {
     OrderGoodRepository orderGoodRepository;
 
     @Override
-    public void getCartGoods(Id request, StreamObserver<CartGood> responseObserver) {
+    public void getCartGoods(Id request, StreamObserver<CartGoodList> responseObserver) {
         List<com.example.ordercontrol.model.entity.CartGood> goods = cartRepository.findAllByUser(
                 userRepository.findById(request.getId()).get());
-        for (com.example.ordercontrol.model.entity.CartGood good: goods){
-            responseObserver.onNext(CartGood.newBuilder()
-                    .setGood(Good.newBuilder()
-                            .setId(good.getGood().getId())
-                            .setName(good.getGood().getName())
-                            .setPrice(good.getGood().getPrice())
-                            .setAmount(good.getGood().getAmount())
-                            .setCanBeSold(good.getGood().getCanBeSold())
-                            .build())
-                    .setAmount(good.getAmount()).build());
-        }
+
+        responseObserver.onNext(CartGoodList.newBuilder().addAllGoods(
+                goods.stream().map(good -> CartGood.newBuilder()
+                        .setGood(Good.newBuilder()
+                                .setId(good.getGood().getId())
+                                .setName(good.getGood().getName())
+                                .setPrice(good.getGood().getPrice())
+                                .setAmount(good.getGood().getAmount())
+                                .setCanBeSold(good.getGood().getCanBeSold()).build())
+                        .setAmount(good.getAmount()).build()).toList()).build());
         responseObserver.onCompleted();
     }
 
     @Transactional
     @Override
-    public void addCartGood(ManageGoodInfo request, StreamObserver<StringResponse> responseObserver) {
-        Optional<com.example.ordercontrol.model.entity.Good> good = goodRepository.findById(request.getGoodId());
-        if (good.isPresent()) {
-            com.example.ordercontrol.model.entity.CartGood cartGood = new com.example.ordercontrol.model.entity.CartGood(
-                    userRepository.findById(request.getUserId()).get(),
-                    good.get()
-            );
-            try {
-                cartRepository.saveAndFlush(cartGood);
-            } catch (DataIntegrityViolationException e) {
-                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                responseObserver.onError(Status.ALREADY_EXISTS.withDescription(
-                        String.format("Good with id %d is already in the cart", request.getGoodId())).asRuntimeException());
-                return;
-            } catch (Exception e) {
-                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                responseObserver.onError(Status.INTERNAL.withDescription("Unknown error").asRuntimeException());
-                return;
-            }
-            responseObserver.onNext(StringResponse.newBuilder()
-                    .setResponse("Good added to the cart successfully").build());
-            responseObserver.onCompleted();
-        } else {
-            responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Unknown good id").asRuntimeException());
-        }
-    }
-
-    @Transactional
-    private void saveCartGoods(List<com.example.ordercontrol.model.entity.CartGood> goods){
-        cartRepository.saveAll(goods);
-        cartRepository.flush();
-    }
-
-    @Override
-    public StreamObserver<ManageGoodInfo> addCartGoods(StreamObserver<StringResponse> responseObserver) {
-        return new StreamObserver<ManageGoodInfo>() {
-            final List<ManageGoodInfo> goodsInfo = new ArrayList<>();
-
-            @Override
-            public void onNext(ManageGoodInfo manageGoodInfo) {
-                goodsInfo.add(manageGoodInfo);
-            }
-
-            @Override
-            public void onError(Throwable throwable) {}
-
-            @Override
-            public void onCompleted() {
-                List<com.example.ordercontrol.model.entity.CartGood> goods = new ArrayList<>();
-                for (ManageGoodInfo info: goodsInfo){
-                    if (goodRepository.existsById(info.getGoodId())){
-                        goods.add(new com.example.ordercontrol.model.entity.CartGood(
-                                userRepository.findById(info.getUserId()).get(),
-                                goodRepository.findById(info.getGoodId()).get()
-                        ));
-                    } else {
-                        responseObserver.onError(Status.INVALID_ARGUMENT
-                                .withDescription("List contains unknown good id").asRuntimeException());
-                        return;
-                    }
-                }
-                try {
-                    saveCartGoods(goods);
-                } catch (DataIntegrityViolationException e){
-                    responseObserver.onError(Status.ALREADY_EXISTS.withDescription(
-                            "List contains good that is already in the cart").asRuntimeException());
-                    return;
-                } catch (Exception e){
-                    responseObserver.onError(Status.INTERNAL.withDescription("Unknown error").asRuntimeException());
-                    return;
-                }
-                responseObserver.onNext(StringResponse.newBuilder()
-                        .setResponse("Goods added to the cart successfully").build());
-                responseObserver.onCompleted();
-            }
-        };
-    }
-
-    @Transactional
-    @Override
-    public void deleteCartGood(ManageGoodInfo request, StreamObserver<StringResponse> responseObserver) {
-        if (goodRepository.existsById(request.getGoodId())){
-            Optional<com.example.ordercontrol.model.entity.CartGood> good = cartRepository.findByUserAndGood(
-                    userRepository.findById(request.getUserId()).get(),
-                    goodRepository.findById(request.getUserId()).get());
+    public void addCartGoods(ManageGoodInfoList request, StreamObserver<StringResponse> responseObserver) {
+        List<com.example.ordercontrol.model.entity.CartGood> cartGoods = new ArrayList<>();
+        User user = userRepository.findById(request.getInfos(0).getUserId()).get();
+        for (ManageGoodInfo info: request.getInfosList()){
+            Optional<com.example.ordercontrol.model.entity.Good> good = goodRepository.findById(info.getGoodId());
             if (good.isPresent()){
-                try {
-                    cartRepository.delete(good.get());
-                } catch (Exception e){
-                    responseObserver.onError(Status.INTERNAL.withDescription("Unknown error").asRuntimeException());
-                    return;
-                }
-                responseObserver.onNext(StringResponse.newBuilder()
-                        .setResponse("Good deleted from the cart successfully").build());
-                responseObserver.onCompleted();
+                cartGoods.add(new com.example.ordercontrol.model.entity.CartGood(user, good.get()));
             } else {
-                responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(
-                        String.format("Good with id '%d' is not in the cart", request.getGoodId())).asRuntimeException());
-            }
-        } else {
-            responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Unknown good id").asRuntimeException());
-        }
-    }
-
-    @Transactional
-    private void deleteCartGoods(List<com.example.ordercontrol.model.entity.CartGood> goods){
-        cartRepository.deleteAll(goods);
-    }
-
-    @Override
-    public StreamObserver<ManageGoodInfo> deleteCartGoods(StreamObserver<StringResponse> responseObserver) {
-        return new StreamObserver<ManageGoodInfo>() {
-            final List<ManageGoodInfo> goodsInfo = new ArrayList<>();
-
-            @Override
-            public void onNext(ManageGoodInfo manageGoodInfo) {
-                goodsInfo.add(manageGoodInfo);
-            }
-
-            @Override
-            public void onError(Throwable throwable) {}
-
-            @Override
-            public void onCompleted() {
-                List<com.example.ordercontrol.model.entity.CartGood> goods = new ArrayList<>();
-                for (ManageGoodInfo info: goodsInfo){
-                    if (goodRepository.existsById(info.getGoodId())){
-                        goods.add(new com.example.ordercontrol.model.entity.CartGood(
-                                userRepository.findById(info.getUserId()).get(),
-                                goodRepository.findById(info.getGoodId()).get()
-                        ));
-                    } else {
-                        responseObserver.onError(Status.INVALID_ARGUMENT
-                                .withDescription("List contains unknown good id").asRuntimeException());
-                        return;
-                    }
-                }
-                try {
-                    deleteCartGoods(goods);
-                } catch (Exception e){
-                    responseObserver.onError(Status.INTERNAL.withDescription("Unknown error").asRuntimeException());
-                    return;
-                }
-                responseObserver.onNext(StringResponse.newBuilder()
-                        .setResponse("Goods added to the cart successfully").build());
-                responseObserver.onCompleted();
-            }
-        };
-    }
-
-    @Transactional
-    @Override
-    public void alterCartGoodAmount(GoodAmountInfo request, StreamObserver<StringResponse> responseObserver) {
-        Optional<com.example.ordercontrol.model.entity.Good> goodOpt = goodRepository.findById(request.getGoodId());
-        if (goodOpt.isPresent()){
-            Optional<com.example.ordercontrol.model.entity.CartGood> cartGoodOpt = cartRepository.findByUserAndGood(
-                    userRepository.findById(request.getUserId()).get(),
-                    goodOpt.get()
-            );
-            if (cartGoodOpt.isPresent()){
-                try{
-                    com.example.ordercontrol.model.entity.CartGood good = cartGoodOpt.get();
-                    good.setAmount(request.getAmount());
-                    cartRepository.saveAndFlush(good);
-                } catch (OptimisticLockException e){
-                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                    responseObserver.onError(Status.INTERNAL.withDescription(
-                            "Listed good has been already modified").asRuntimeException());
-                    return;
-                } catch (Exception e){
-                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                    responseObserver.onError(Status.INTERNAL.withDescription("Unknown error").asRuntimeException());
-                    return;
-                }
-            }else {
-                responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(
-                        String.format("Good with id '%d' is not in the cart", request.getGoodId())).asRuntimeException());
+                responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Unknown good id").asRuntimeException());
                 return;
             }
-            responseObserver.onNext(StringResponse.newBuilder()
-                    .setResponse("Good modified successfully").build());
-            responseObserver.onCompleted();
-        } else {
-            responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Unknown good id").asRuntimeException());
         }
+        try {
+            cartRepository.saveAllAndFlush(cartGoods);
+        } catch (DataIntegrityViolationException e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            responseObserver.onError(Status.ALREADY_EXISTS.withDescription(
+                    "List contains good that is already in the cart").asRuntimeException());
+            return;
+        } catch (Exception e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            responseObserver.onError(Status.INTERNAL.withDescription("Unknown error").asRuntimeException());
+            return;
+        }
+        responseObserver.onNext(StringResponse.newBuilder()
+                .setResponse("Goods added to the cart successfully").build());
+        responseObserver.onCompleted();
     }
 
     @Transactional
-    private void alterCartGoodsAmount(List<com.example.ordercontrol.model.entity.CartGood> goods){
-        cartRepository.saveAll(goods);
-        cartRepository.flush();
+    @Override
+    public void deleteCartGoods(ManageGoodInfoList request, StreamObserver<StringResponse> responseObserver) {
+        List<com.example.ordercontrol.model.entity.CartGood> cartGoods = new ArrayList<>();
+        User user = userRepository.findById(request.getInfos(0).getUserId()).get();
+        for (ManageGoodInfo info: request.getInfosList()){
+            Optional<com.example.ordercontrol.model.entity.Good> good = goodRepository.findById(info.getGoodId());
+            if (good.isPresent()){
+                Optional<com.example.ordercontrol.model.entity.CartGood> cartGood = cartRepository.findByUserAndGood(user, good.get());
+                if (cartGood.isPresent()){
+                    cartGoods.add(cartGood.get());
+                } else {
+                    responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(
+                            "List contains good that is not in the cart").asRuntimeException());
+                    return;
+                }
+            } else {
+                responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Unknown good id").asRuntimeException());
+                return;
+            }
+        }
+        try {
+            cartRepository.deleteAll(cartGoods);
+        } catch (Exception e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            responseObserver.onError(Status.INTERNAL.withDescription("Unknown error").asRuntimeException());
+            return;
+        }
+        responseObserver.onNext(StringResponse.newBuilder()
+                .setResponse("Goods deleted from the cart successfully").build());
+        responseObserver.onCompleted();
     }
 
+    @Transactional
     @Override
-    public StreamObserver<GoodAmountInfo> alterCartGoodsAmount(StreamObserver<StringResponse> responseObserver) {
-        return new StreamObserver<GoodAmountInfo>() {
-            final List<GoodAmountInfo> goodsInfo = new ArrayList<>();
-
-            @Override
-            public void onNext(GoodAmountInfo goodAmountInfo) {
-                goodsInfo.add(goodAmountInfo);
-            }
-
-            @Override
-            public void onError(Throwable throwable) {}
-
-            @Override
-            public void onCompleted() {
-                List<com.example.ordercontrol.model.entity.CartGood> goods = new ArrayList<>();
-                for (GoodAmountInfo info: goodsInfo){
-                    if (goodRepository.existsById(info.getGoodId())){
-                        Optional<com.example.ordercontrol.model.entity.CartGood> cartGoodOpt = cartRepository.findByUserAndGood(
-                                userRepository.findById(info.getUserId()).get(),
-                                goodRepository.findById(info.getGoodId()).get()
-                        );
-                        if (cartGoodOpt.isPresent()){
-                            com.example.ordercontrol.model.entity.CartGood good = cartGoodOpt.get();
-                            good.setAmount(info.getAmount());
-                            goods.add(good);
-                        } else {
-                            responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(
-                                    "List contains good that is not in the cart").asRuntimeException());
-                            return;
-                        }
-                    } else {
-                        responseObserver.onError(Status.INVALID_ARGUMENT
-                                .withDescription("List contains unknown good id").asRuntimeException());
-                        return;
-                    }
-                }
-                try {
-                    alterCartGoodsAmount(goods);
-                } catch (OptimisticLockException e){
-                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                    responseObserver.onError(Status.INTERNAL.withDescription(
-                            "Listed good has been already modified").asRuntimeException());
-                    return;
-                } catch (Exception e){
-                    responseObserver.onError(Status.INTERNAL.withDescription("Unknown error").asRuntimeException());
+    public void alterCartGoodsAmount(GoodAmountInfoList request, StreamObserver<StringResponse> responseObserver) {
+        List<com.example.ordercontrol.model.entity.CartGood> cartGoods = new ArrayList<>();
+        User user = userRepository.findById(request.getInfos(0).getUserId()).get();
+        for (GoodAmountInfo info: request.getInfosList()){
+            Optional<com.example.ordercontrol.model.entity.Good> good = goodRepository.findById(info.getGoodId());
+            if (good.isPresent()){
+                Optional<com.example.ordercontrol.model.entity.CartGood> cartGood = cartRepository.findByUserAndGood(user, good.get());
+                if (cartGood.isPresent()){
+                    cartGood.get().setAmount(info.getAmount());
+                    cartGoods.add(cartGood.get());
+                } else {
+                    responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(
+                            "List contains good that is not in the cart").asRuntimeException());
                     return;
                 }
-                responseObserver.onNext(StringResponse.newBuilder()
-                        .setResponse("Goods modified successfully").build());
-                responseObserver.onCompleted();
+            } else {
+                responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Unknown good id").asRuntimeException());
+                return;
             }
-        };
+        }
+        try {
+            cartRepository.saveAllAndFlush(cartGoods);
+        } catch (OptimisticLockException e){
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            responseObserver.onError(Status.INTERNAL.withDescription(
+                    "Listed good has already been modified").asRuntimeException());
+            return;
+        } catch (Exception e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            responseObserver.onError(Status.INTERNAL.withDescription("Unknown error").asRuntimeException());
+            return;
+        }
+        responseObserver.onNext(StringResponse.newBuilder()
+                .setResponse("Goods amount updated successfully").build());
+        responseObserver.onCompleted();
     }
 
     private OrderGood constructOrderGood(com.example.ordercontrol.model.entity.OrderGood good){
@@ -302,37 +155,36 @@ public class OrderService extends OrdersServiceGrpc.OrdersServiceImplBase {
                         .setPrice(good.getGoodType().getPrice())
                         .setAmount(good.getGoodType().getAmount())
                         .setCanBeSold(good.getGoodType().getCanBeSold()).build())
-                .setPrice(good.getPrice())
+                .setAmount(good.getAmount())
                 .setPrice(good.getPrice()).build();
     }
 
     @Override
-    public void getUserOrders(Id request, StreamObserver<Order> responseObserver) {
+    public void getUserOrders(Id request, StreamObserver<OrderList> responseObserver) {
         List<com.example.ordercontrol.model.entity.Order> orders = orderRepository.findAllByUser(
                 userRepository.findById(request.getId()).get());
-        for (com.example.ordercontrol.model.entity.Order order: orders){
-            responseObserver.onNext(Order.newBuilder()
-                    .setId(order.getId())
-                    .setOrderStatus(order.getStatus())
-                    .setPrice(order.getPrice())
-                    .addAllGoods(order.getGoods().stream().map(this::constructOrderGood).toList()).build());
-        }
+        responseObserver.onNext(OrderList.newBuilder()
+                .addAllOrders(orders.stream().map(ord -> Order.newBuilder()
+                        .setId(ord.getId())
+                        .setOrderStatus(ord.getStatus())
+                        .setPrice(ord.getPrice())
+                        .addAllGoods(ord.getGoods().stream().map(this::constructOrderGood).toList()).build()).toList()).build());
+
         responseObserver.onCompleted();
     }
 
     @Override
-    public void getOrdersByStatus(StatusWindow request, StreamObserver<OrderAndUser> responseObserver) {
+    public void getOrdersByStatus(StatusWindow request, StreamObserver<OrderAndUserList> responseObserver) {
         List<com.example.ordercontrol.model.entity.Order> orders = orderRepository.findByStatusBetween(
                 request.getOrderStatusMin(),
                 request.getOrderStatusMax());
-        for (com.example.ordercontrol.model.entity.Order order: orders){
-            responseObserver.onNext(OrderAndUser.newBuilder()
-                    .setId(order.getId())
-                    .setOrderStatus(order.getStatus())
-                    .setPrice(order.getPrice())
-                    .setUserId(order.getUser().getId())
-                    .addAllGoods(order.getGoods().stream().map(this::constructOrderGood).toList()).build());
-        }
+        responseObserver.onNext(OrderAndUserList.newBuilder()
+                .addAllOrders(orders.stream().map(ord -> OrderAndUser.newBuilder()
+                        .setId(ord.getId())
+                        .setOrderStatus(ord.getStatus())
+                        .setPrice(ord.getPrice())
+                        .setUserId(ord.getUser().getId())
+                        .addAllGoods(ord.getGoods().stream().map(this::constructOrderGood).toList()).build()).toList()).build());
         responseObserver.onCompleted();
     }
 
@@ -371,7 +223,9 @@ public class OrderService extends OrdersServiceGrpc.OrdersServiceImplBase {
         List<com.example.ordercontrol.model.entity.OrderGood> orderGoods = new ArrayList<>();
         List<com.example.ordercontrol.model.entity.Good> goodsBought = new ArrayList<>();
         com.example.ordercontrol.model.entity.Order order = new com.example.ordercontrol.model.entity.Order(0.0, user);
-        for (com.example.ordercontrol.model.entity.CartGood good: cartGoods) {
+        Iterator<com.example.ordercontrol.model.entity.CartGood> iterator = cartGoods.iterator();
+        while (iterator.hasNext()) {
+            com.example.ordercontrol.model.entity.CartGood good = iterator.next();
             int amount;
             if (request.getBuyMax()) {
                 amount = Math.min(good.getAmount(), good.getGood().getAmount());
@@ -382,17 +236,22 @@ public class OrderService extends OrdersServiceGrpc.OrdersServiceImplBase {
                 }
                 amount = good.getAmount();
             }
-            if (amount > 0 && good.getGood().getCanBeSold()){
-                good.getGood().setAmount(good.getGood().getAmount() - amount);
-                goodsBought.add(good.getGood());
-                orderGoods.add(new com.example.ordercontrol.model.entity.OrderGood(
-                        good.getGood(),
-                        good.getGood().getPrice() * amount,
-                        amount,
-                        order));
-                order.setPrice(order.getPrice() + good.getGood().getPrice() * amount);
+            if (good.getGood().getCanBeSold()){
+                if (amount > 0){
+                    good.getGood().setAmount(good.getGood().getAmount() - amount);
+                    goodsBought.add(good.getGood());
+                    orderGoods.add(new com.example.ordercontrol.model.entity.OrderGood(
+                            good.getGood(),
+                            good.getGood().getPrice() * amount,
+                            amount,
+                            order));
+                    order.setPrice(order.getPrice() + good.getGood().getPrice() * amount);
+                } else {
+                    responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Not enough goods available").asRuntimeException());
+                    return;
+                }
             } else {
-                cartGoods.remove(good);
+                iterator.remove();
             }
         }
         if (!goodsBought.isEmpty()){

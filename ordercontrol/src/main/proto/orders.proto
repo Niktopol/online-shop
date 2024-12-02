@@ -8,17 +8,12 @@ option java_package = "com.example.orders";
 option java_outer_classname = "OrdersProto";
 
 service OrdersService {
-  rpc GetCartGoods (Id) returns (stream CartGood) {}
-  rpc AddCartGood (ManageGoodInfo) returns (StringResponse) {}
-  rpc AddCartGoods (stream ManageGoodInfo) returns (StringResponse) {}
-  rpc DeleteCartGood (ManageGoodInfo) returns (StringResponse) {}
-  rpc DeleteCartGoods (stream ManageGoodInfo) returns (StringResponse) {}
-  rpc AlterCartGoodAmount (GoodAmountInfo) returns (StringResponse) {}
-  rpc AlterCartGoodsAmount (stream GoodAmountInfo) returns (StringResponse) {}
-  rpc GetUserOrders (Id) returns (stream Order) {}
-  rpc GetOrdersByStatus(StatusWindow) returns (stream OrderAndUser) {}
+  rpc GetCartGoods (Id) returns (CartGoodList) {}
+  rpc AddCartGoods (ManageGoodInfoList) returns (StringResponse) {}
+  rpc DeleteCartGoods (ManageGoodInfoList) returns (StringResponse) {}
+  rpc AlterCartGoodsAmount (GoodAmountInfoList) returns (StringResponse) {}
+  rpc GetUserOrders (Id) returns (OrderList) {}
+  rpc GetOrdersByStatus(StatusWindow) returns (OrderAndUserList) {}
   rpc SetOrderStatus (OrderStatus) returns (StringResponse) {}
   rpc CreateOrder (CreateOrderInfo) returns (StringResponse) {}
 }
-
-

@@ -26,7 +26,7 @@ public class Order {
     @Column(nullable = false)
     private Double price;
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", fetch = FetchType.EAGER)
     private List<OrderGood> goods;
 
     @ManyToOne

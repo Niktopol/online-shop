@@ -22,12 +22,12 @@ public class CartGood {
 
     @ManyToOne
     @MapsId("userId")
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     User user;
 
     @ManyToOne
     @MapsId("goodId")
-    @JoinColumn(name = "good_id", nullable = false)
+    @JoinColumn(name = "good_id")
     Good good;
 
     @Column(nullable = false)
@@ -37,5 +37,6 @@ public class CartGood {
         this.amount = 1;
         this.user = user;
         this.good = good;
+        this.id = new UserGoodKey(user.getId(), good.getId());
     }
 }

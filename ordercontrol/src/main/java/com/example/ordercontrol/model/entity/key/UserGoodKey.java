@@ -24,7 +24,7 @@ public class UserGoodKey implements Serializable {
 
     @Override
     public int hashCode() {
-        return (String.valueOf(userId) + String.valueOf(goodId)).hashCode();
+        return Objects.hash(userId, goodId);
     }
 
     @Override
