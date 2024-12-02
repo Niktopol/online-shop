@@ -302,8 +302,12 @@ public class OrderService extends OrdersServiceGrpc.OrdersServiceImplBase {
 
     private OrderGood constructOrderGood(com.example.ordercontrol.model.entity.OrderGood good){
         return OrderGood.newBuilder()
-                .setId(good.getGoodType().getId())
-                .setName(good.getGoodType().getName())
+                .setGood(Good.newBuilder()
+                        .setId(good.getGoodType().getId())
+                        .setName(good.getGoodType().getName())
+                        .setPrice(good.getGoodType().getPrice())
+                        .setAmount(good.getGoodType().getAmount())
+                        .setCanBeSold(good.getGoodType().getCanBeSold()).build())
                 .setPrice(good.getPrice())
                 .setPrice(good.getPrice()).build();
     }

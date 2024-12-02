@@ -21,23 +21,23 @@ public class GoodsController {
     GoodsService service;
 
     @QueryMapping
-    List<GoodDTO> getGoodsList(){
+    public List<GoodDTO> getGoodsList(){
         return service.getGoodsList().join();
     }
 
     @QueryMapping
-    GoodDTO getGood(@Argument Long id){
+    public GoodDTO getGood(@Argument Long id){
         return service.getGood(id).join();
     }
 
     @QueryMapping
-    List<GoodDTO> findGoods(@Argument String name){
+    public List<GoodDTO> findGoods(@Argument String name){
         return service.findGoods(name).join();
     }
 
     @PreAuthorize("hasAuthority('OWNER')")
     @MutationMapping
-    OperationResultDTO addGood(@Argument List<GoodAddDTO> goods) {
+    public OperationResultDTO addGood(@Argument List<GoodAddDTO> goods) {
         if(goods.isEmpty()){
             throw new EmptyListException("Provided list must contain elements");
         } else if (goods.size() == 1) {
@@ -51,7 +51,7 @@ public class GoodsController {
 
     @PreAuthorize("hasAuthority('OWNER')")
     @MutationMapping
-    OperationResultDTO alterGood(@Argument List<AlterGoodDTO> goods) {
+    public OperationResultDTO alterGood(@Argument List<AlterGoodDTO> goods) {
         if(goods.isEmpty()){
             throw new EmptyListException("Provided list must contain elements");
         } else if (goods.size() == 1) {

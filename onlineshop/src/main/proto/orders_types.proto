@@ -48,10 +48,9 @@ message CreateOrderInfo{
 }
 
 message OrderGood{
-  int64 id = 1;
-  string name = 2;
-  double price = 3;
-  int32 amount = 4;
+  Good good = 1;
+  double price = 2;
+  int32 amount = 3;
 }
 
 message CartGood{
