@@ -19,11 +19,14 @@ public class GraphqlStatusExceptionResolver extends DataFetcherExceptionResolver
             GraphqlErrorBuilder<?> builder = GraphqlErrorBuilder.newError()
                     .path(env.getExecutionStepInfo().getPath())
                     .location(env.getField().getSourceLocation());
-            if (((StatusRuntimeException) ex).getStatus().getCode() == Status.Code.NOT_FOUND){
-                builder.errorType(ErrorType.NOT_FOUND).message(((StatusRuntimeException) ex).getStatus().getDescription());
-            }else if (((StatusRuntimeException) ex).getStatus().getCode() == Status.Code.UNAVAILABLE){
+            Status status = ((StatusRuntimeException) ex).getStatus();
+            if (status.getCode() == Status.Code.NOT_FOUND){
+                builder.errorType(ErrorType.NOT_FOUND).message(status.getDescription());
+            } else if (status.getCode() == Status.Code.ALREADY_EXISTS || status.getCode() == Status.Code.INTERNAL || status.getCode() == Status.Code.INVALID_ARGUMENT){
+                builder.errorType(ErrorType.BAD_REQUEST).message(status.getDescription());
+            } else if (status.getCode() == Status.Code.UNAVAILABLE){
                 builder.errorType(ErrorType.INTERNAL_ERROR).message("Service unavailable");
-            }else {
+            } else {
                 builder.errorType(ErrorType.INTERNAL_ERROR).message(ex.getMessage());
             }
             return builder.build();

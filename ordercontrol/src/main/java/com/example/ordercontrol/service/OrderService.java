@@ -66,8 +66,7 @@ public class OrderService extends OrdersServiceGrpc.OrdersServiceImplBase {
                 return;
             }
             responseObserver.onNext(StringResponse.newBuilder()
-                    .setResponse("Good added to the cart successfully")
-                    .setResponseCode(100).build());
+                    .setResponse("Good added to the cart successfully").build());
             responseObserver.onCompleted();
         } else {
             responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Unknown good id").asRuntimeException());
@@ -119,8 +118,7 @@ public class OrderService extends OrdersServiceGrpc.OrdersServiceImplBase {
                     return;
                 }
                 responseObserver.onNext(StringResponse.newBuilder()
-                        .setResponse("Goods added to the cart successfully")
-                        .setResponseCode(100).build());
+                        .setResponse("Goods added to the cart successfully").build());
                 responseObserver.onCompleted();
             }
         };
@@ -141,8 +139,7 @@ public class OrderService extends OrdersServiceGrpc.OrdersServiceImplBase {
                     return;
                 }
                 responseObserver.onNext(StringResponse.newBuilder()
-                        .setResponse("Good deleted from the cart successfully")
-                        .setResponseCode(100).build());
+                        .setResponse("Good deleted from the cart successfully").build());
                 responseObserver.onCompleted();
             } else {
                 responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(
@@ -193,8 +190,7 @@ public class OrderService extends OrdersServiceGrpc.OrdersServiceImplBase {
                     return;
                 }
                 responseObserver.onNext(StringResponse.newBuilder()
-                        .setResponse("Goods added to the cart successfully")
-                        .setResponseCode(100).build());
+                        .setResponse("Goods added to the cart successfully").build());
                 responseObserver.onCompleted();
             }
         };
@@ -230,8 +226,7 @@ public class OrderService extends OrdersServiceGrpc.OrdersServiceImplBase {
                 return;
             }
             responseObserver.onNext(StringResponse.newBuilder()
-                    .setResponse("Good modified successfully")
-                    .setResponseCode(100).build());
+                    .setResponse("Good modified successfully").build());
             responseObserver.onCompleted();
         } else {
             responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Unknown good id").asRuntimeException());
@@ -293,8 +288,7 @@ public class OrderService extends OrdersServiceGrpc.OrdersServiceImplBase {
                     return;
                 }
                 responseObserver.onNext(StringResponse.newBuilder()
-                        .setResponse("Goods modified successfully")
-                        .setResponseCode(100).build());
+                        .setResponse("Goods modified successfully").build());
                 responseObserver.onCompleted();
             }
         };
@@ -362,8 +356,7 @@ public class OrderService extends OrdersServiceGrpc.OrdersServiceImplBase {
                 return;
             }
             responseObserver.onNext(StringResponse.newBuilder()
-                    .setResponse("Order status changed successfully")
-                    .setResponseCode(100).build());
+                    .setResponse("Order status changed successfully").build());
             responseObserver.onCompleted();
         } else {
             responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Unknown order id").asRuntimeException());
@@ -423,8 +416,7 @@ public class OrderService extends OrdersServiceGrpc.OrdersServiceImplBase {
                 return;
             }
             responseObserver.onNext(StringResponse.newBuilder()
-                    .setResponse("Order created")
-                    .setResponseCode(100).build());
+                    .setResponse("Order created").build());
             responseObserver.onCompleted();
         } else {
             responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Can't create empty order").asRuntimeException());

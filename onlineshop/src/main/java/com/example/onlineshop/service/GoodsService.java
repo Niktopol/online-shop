@@ -4,7 +4,6 @@ import com.example.goods.GoodsServiceGrpc;
 import com.example.onlineshop.model.dto.AlterGoodDTO;
 import com.example.onlineshop.model.dto.GoodAddDTO;
 import com.example.onlineshop.model.dto.GoodDTO;
-import com.example.onlineshop.model.dto.OperationResultDTO;
 import com.example.types.*;
 import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
@@ -14,6 +13,8 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+
+import static com.example.onlineshop.service.OrdersService.getStringResponseStreamObserver;
 
 @Component
 public class GoodsService {
@@ -91,26 +92,10 @@ public class GoodsService {
         return future;
     }
 
-    public CompletableFuture<OperationResultDTO> addGoods(List<GoodAddDTO> goods){
-        CompletableFuture<OperationResultDTO> future = new CompletableFuture<>();
-        final OperationResultDTO[] result = new OperationResultDTO[1];
+    public CompletableFuture<String> addGoods(List<GoodAddDTO> goods){
+        CompletableFuture<String> future = new CompletableFuture<>();
 
-        final StreamObserver<StringResponse> responseObserver = new StreamObserver<StringResponse>() {
-            @Override
-            public void onNext(StringResponse stringResponse) {
-                result[0] = new OperationResultDTO(stringResponse.getResponseCode(), stringResponse.getResponse());
-            }
-
-            @Override
-            public void onError(Throwable throwable) {
-                future.completeExceptionally(throwable);
-            }
-
-            @Override
-            public void onCompleted() {
-                future.complete(result[0]);
-            }
-        };
+        final StreamObserver<StringResponse> responseObserver = getStringResponseStreamObserver(future);
 
         final StreamObserver<GoodAddInfo> request = stub.addGoods(responseObserver);
         goods.stream()
@@ -121,26 +106,10 @@ public class GoodsService {
         return future;
     }
 
-    public CompletableFuture<OperationResultDTO> addGood(GoodAddDTO good){
-        CompletableFuture<OperationResultDTO> future = new CompletableFuture<>();
-        final OperationResultDTO[] result = new OperationResultDTO[1];
+    public CompletableFuture<String> addGood(GoodAddDTO good){
+        CompletableFuture<String> future = new CompletableFuture<>();
 
-        final StreamObserver<StringResponse> responseObserver = new StreamObserver<StringResponse>() {
-            @Override
-            public void onNext(StringResponse stringResponse) {
-                result[0] = new OperationResultDTO(stringResponse.getResponseCode(), stringResponse.getResponse());
-            }
-
-            @Override
-            public void onError(Throwable throwable) {
-                future.completeExceptionally(throwable);
-            }
-
-            @Override
-            public void onCompleted() {
-                future.complete(result[0]);
-            }
-        };
+        final StreamObserver<StringResponse> responseObserver = getStringResponseStreamObserver(future);
 
         stub.addGood(GoodAddInfo.newBuilder().setName(good.getName()).setPrice(good.getPrice()).build(), responseObserver);
         return future;
@@ -164,26 +133,10 @@ public class GoodsService {
         return builder.build();
     }
 
-    public CompletableFuture<OperationResultDTO> alterGoods(List<AlterGoodDTO> goods){
-        CompletableFuture<OperationResultDTO> future = new CompletableFuture<>();
-        final OperationResultDTO[] result = new OperationResultDTO[1];
+    public CompletableFuture<String> alterGoods(List<AlterGoodDTO> goods){
+        CompletableFuture<String> future = new CompletableFuture<>();
 
-        final StreamObserver<StringResponse> responseObserver = new StreamObserver<StringResponse>() {
-            @Override
-            public void onNext(StringResponse stringResponse) {
-                result[0] = new OperationResultDTO(stringResponse.getResponseCode(), stringResponse.getResponse());
-            }
-
-            @Override
-            public void onError(Throwable throwable) {
-                future.completeExceptionally(throwable);
-            }
-
-            @Override
-            public void onCompleted() {
-                future.complete(result[0]);
-            }
-        };
+        final StreamObserver<StringResponse> responseObserver = getStringResponseStreamObserver(future);
 
         final StreamObserver<GoodAlterInfo> request = stub.alterGoods(responseObserver);
         goods.stream()
@@ -194,26 +147,10 @@ public class GoodsService {
         return future;
     }
 
-    public CompletableFuture<OperationResultDTO> alterGood(AlterGoodDTO good){
-        CompletableFuture<OperationResultDTO> future = new CompletableFuture<>();
-        final OperationResultDTO[] result = new OperationResultDTO[1];
+    public CompletableFuture<String> alterGood(AlterGoodDTO good){
+        CompletableFuture<String> future = new CompletableFuture<>();
 
-        final StreamObserver<StringResponse> responseObserver = new StreamObserver<StringResponse>() {
-            @Override
-            public void onNext(StringResponse stringResponse) {
-                result[0] = new OperationResultDTO(stringResponse.getResponseCode(), stringResponse.getResponse());
-            }
-
-            @Override
-            public void onError(Throwable throwable) {
-                future.completeExceptionally(throwable);
-            }
-
-            @Override
-            public void onCompleted() {
-                future.complete(result[0]);
-            }
-        };
+        final StreamObserver<StringResponse> responseObserver = getStringResponseStreamObserver(future);
 
         stub.alterGood(constructGoodAlterInfo(good), responseObserver);
         return future;

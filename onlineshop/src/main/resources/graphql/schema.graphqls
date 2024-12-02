@@ -50,26 +50,21 @@ type OrderAndUser{
     userId: Int!
 }
 
-type OperationResult{
-    status: Int!
-    desc: String!
-}
-
 type Query{
-    getGoodsList: [Good!]!#
-    getGood(id: Int!): Good!#
-    findGoods(name: String!): [Good!]!#
+    getGoodsList: [Good!]!
+    getGood(id: Int!): Good!
+    findGoods(name: String!): [Good!]!
     getOrders: [Order!]!
     getOrdersByStatus(status_min: Int!, status_max: Int!): [OrderAndUser!]!
     getCart: [CartGood!]!
 }
 
 type Mutation{
-    addGood(goods: [GoodAdd!]!): OperationResult!#
-    alterGood(goods: [AlterGood!]!): OperationResult!#
-    addGoodsToCart(ids: [Int!]!): OperationResult!
-    delGoodsFromCart(ids: [Int!]!): OperationResult!
-    alterCartGoodAmounts(goods: [GoodAmount!]!): OperationResult!
-    setOrderStatus(id: Int!, status: Int!): OperationResult!
-    createOrder(buyAvailable: Boolean!): OperationResult!
+    addGood(goods: [GoodAdd!]!): String!
+    alterGood(goods: [AlterGood!]!): String!
+    addGoodsToCart(ids: [Int!]!): String!
+    delGoodsFromCart(ids: [Int!]!): String!
+    alterCartGoodAmounts(goods: [GoodAmount!]!): String!
+    setOrderStatus(id: Int!, status: Int!): String!
+    createOrder(buyAvailable: Boolean!): String!
 }

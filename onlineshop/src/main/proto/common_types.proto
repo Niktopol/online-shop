@@ -18,5 +18,4 @@ message Good{
 
 message StringResponse {
   string response = 1;
-  int32 responseCode = 2;
 }

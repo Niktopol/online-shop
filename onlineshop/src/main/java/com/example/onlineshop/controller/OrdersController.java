@@ -9,11 +9,13 @@ import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @AllArgsConstructor
+@CrossOrigin
 @Controller
 public class OrdersController {
     OrdersService service;
@@ -42,55 +44,55 @@ public class OrdersController {
 
     @PreAuthorize("hasAuthority('CUSTOMER')")
     @MutationMapping
-    public OperationResultDTO addGoodsToCart(@Argument List<Long> ids){
+    public String addGoodsToCart(@Argument List<Long> ids){
         if(ids.isEmpty()){
             throw new EmptyListException("Provided list must contain elements");
         } else if (ids.size() == 1) {
-            CompletableFuture<OperationResultDTO> future = service.addGoodToCart(ids.get(0));
+            CompletableFuture<String> future = service.addGoodToCart(ids.get(0));
             return future.join();
         }else{
-            CompletableFuture<OperationResultDTO> future = service.addGoodsToCart(ids);
+            CompletableFuture<String> future = service.addGoodsToCart(ids);
             return future.join();
         }
     }
 
     @PreAuthorize("hasAuthority('CUSTOMER')")
     @MutationMapping
-    public OperationResultDTO delGoodsFromCart(@Argument List<Long> ids){
+    public String delGoodsFromCart(@Argument List<Long> ids){
         if(ids.isEmpty()){
             throw new EmptyListException("Provided list must contain elements");
         } else if (ids.size() == 1) {
-            CompletableFuture<OperationResultDTO> future = service.delGoodFromCart(ids.get(0));
+            CompletableFuture<String> future = service.delGoodFromCart(ids.get(0));
             return future.join();
         }else{
-            CompletableFuture<OperationResultDTO> future = service.delGoodsFromCart(ids);
+            CompletableFuture<String> future = service.delGoodsFromCart(ids);
             return future.join();
         }
     }
 
     @PreAuthorize("hasAuthority('CUSTOMER')")
     @MutationMapping
-    public OperationResultDTO alterCartGoodAmounts(@Argument List<GoodAmountDTO> goods){
+    public String alterCartGoodAmounts(@Argument List<GoodAmountDTO> goods){
         if(goods.isEmpty()){
             throw new EmptyListException("Provided list must contain elements");
         } else if (goods.size() == 1) {
-            CompletableFuture<OperationResultDTO> future = service.alterCartGoodAmount(goods.get(0));
+            CompletableFuture<String> future = service.alterCartGoodAmount(goods.get(0));
             return future.join();
         }else{
-            CompletableFuture<OperationResultDTO> future = service.alterCartGoodsAmount(goods);
+            CompletableFuture<String> future = service.alterCartGoodsAmount(goods);
             return future.join();
         }
     }
 
     @PreAuthorize("hasAuthority('OWNER')")
     @MutationMapping
-    public OperationResultDTO setOrderStatus(@Argument Long id, @Argument Integer status){
+    public String setOrderStatus(@Argument Long id, @Argument Integer status){
         return service.setOrderStatus(id, status).join();
     }
 
     @PreAuthorize("hasAuthority('CUSTOMER')")
     @MutationMapping
-    public OperationResultDTO createOrder(@Argument Boolean buyAvailable){
+    public String createOrder(@Argument Boolean buyAvailable){
         return service.createOrder(buyAvailable);
     }
 }

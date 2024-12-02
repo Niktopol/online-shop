@@ -6,6 +6,7 @@ import com.example.orders.OrdersServiceGrpc;
 import com.example.types.*;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.client.inject.GrpcClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +20,7 @@ public class OrdersService {
     OrdersServiceGrpc.OrdersServiceStub astub;
     @GrpcClient("orders")
     OrdersServiceGrpc.OrdersServiceBlockingStub bstub;
-
+    @Autowired
     UserRepository userRepository;
 
     public CompletableFuture<List<OrderDTO>> getOrders() {
@@ -125,14 +126,13 @@ public class OrdersService {
         return future;
     }
 
-    public CompletableFuture<OperationResultDTO> addGoodToCart(Long id) {
-        CompletableFuture<OperationResultDTO> future = new CompletableFuture<>();
-        final OperationResultDTO[] result = new OperationResultDTO[1];
+    public static StreamObserver<StringResponse> getStringResponseStreamObserver(CompletableFuture<String> future) {
+        final String[] result = new String[1];
 
-        final StreamObserver<StringResponse> responseObserver = new StreamObserver<StringResponse>() {
+        return new StreamObserver<StringResponse>() {
             @Override
             public void onNext(StringResponse stringResponse) {
-                result[0] = new OperationResultDTO(stringResponse.getResponseCode(), stringResponse.getResponse());
+                result[0] = stringResponse.getResponse();
             }
 
             @Override
@@ -145,6 +145,12 @@ public class OrdersService {
                 future.complete(result[0]);
             }
         };
+    }
+
+    public CompletableFuture<String> addGoodToCart(Long id) {
+        CompletableFuture<String> future = new CompletableFuture<>();
+
+        final StreamObserver<StringResponse> responseObserver = getStringResponseStreamObserver(future);
 
         astub.addCartGood(ManageGoodInfo.newBuilder()
                         .setUserId(userRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName()).get().getId())
@@ -153,26 +159,10 @@ public class OrdersService {
         return future;
     }
 
-    public CompletableFuture<OperationResultDTO> addGoodsToCart(List<Long> ids) {
-        CompletableFuture<OperationResultDTO> future = new CompletableFuture<>();
-        final OperationResultDTO[] result = new OperationResultDTO[1];
+    public CompletableFuture<String> addGoodsToCart(List<Long> ids) {
+        CompletableFuture<String> future = new CompletableFuture<>();
 
-        final StreamObserver<StringResponse> responseObserver = new StreamObserver<StringResponse>() {
-            @Override
-            public void onNext(StringResponse stringResponse) {
-                result[0] = new OperationResultDTO(stringResponse.getResponseCode(), stringResponse.getResponse());
-            }
-
-            @Override
-            public void onError(Throwable throwable) {
-                future.completeExceptionally(throwable);
-            }
-
-            @Override
-            public void onCompleted() {
-                future.complete(result[0]);
-            }
-        };
+        final StreamObserver<StringResponse> responseObserver = getStringResponseStreamObserver(future);
 
         final StreamObserver<ManageGoodInfo> request = astub.addCartGoods(responseObserver);
         ids.stream()
@@ -185,26 +175,10 @@ public class OrdersService {
         return future;
     }
 
-    public CompletableFuture<OperationResultDTO> delGoodFromCart(Long id) {
-        CompletableFuture<OperationResultDTO> future = new CompletableFuture<>();
-        final OperationResultDTO[] result = new OperationResultDTO[1];
+    public CompletableFuture<String> delGoodFromCart(Long id) {
+        CompletableFuture<String> future = new CompletableFuture<>();
 
-        final StreamObserver<StringResponse> responseObserver = new StreamObserver<StringResponse>() {
-            @Override
-            public void onNext(StringResponse stringResponse) {
-                result[0] = new OperationResultDTO(stringResponse.getResponseCode(), stringResponse.getResponse());
-            }
-
-            @Override
-            public void onError(Throwable throwable) {
-                future.completeExceptionally(throwable);
-            }
-
-            @Override
-            public void onCompleted() {
-                future.complete(result[0]);
-            }
-        };
+        final StreamObserver<StringResponse> responseObserver = getStringResponseStreamObserver(future);
 
         astub.deleteCartGood(ManageGoodInfo.newBuilder()
                         .setUserId(userRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName()).get().getId())
@@ -213,26 +187,10 @@ public class OrdersService {
         return future;
     }
 
-    public CompletableFuture<OperationResultDTO> delGoodsFromCart(List<Long> ids) {
-        CompletableFuture<OperationResultDTO> future = new CompletableFuture<>();
-        final OperationResultDTO[] result = new OperationResultDTO[1];
+    public CompletableFuture<String> delGoodsFromCart(List<Long> ids) {
+        CompletableFuture<String> future = new CompletableFuture<>();
 
-        final StreamObserver<StringResponse> responseObserver = new StreamObserver<StringResponse>() {
-            @Override
-            public void onNext(StringResponse stringResponse) {
-                result[0] = new OperationResultDTO(stringResponse.getResponseCode(), stringResponse.getResponse());
-            }
-
-            @Override
-            public void onError(Throwable throwable) {
-                future.completeExceptionally(throwable);
-            }
-
-            @Override
-            public void onCompleted() {
-                future.complete(result[0]);
-            }
-        };
+        final StreamObserver<StringResponse> responseObserver = getStringResponseStreamObserver(future);
 
         final StreamObserver<ManageGoodInfo> request = astub.deleteCartGoods(responseObserver);
         ids.stream()
@@ -245,26 +203,10 @@ public class OrdersService {
         return future;
     }
 
-    public CompletableFuture<OperationResultDTO> alterCartGoodAmount(GoodAmountDTO good) {
-        CompletableFuture<OperationResultDTO> future = new CompletableFuture<>();
-        final OperationResultDTO[] result = new OperationResultDTO[1];
+    public CompletableFuture<String> alterCartGoodAmount(GoodAmountDTO good) {
+        CompletableFuture<String> future = new CompletableFuture<>();
 
-        final StreamObserver<StringResponse> responseObserver = new StreamObserver<StringResponse>() {
-            @Override
-            public void onNext(StringResponse stringResponse) {
-                result[0] = new OperationResultDTO(stringResponse.getResponseCode(), stringResponse.getResponse());
-            }
-
-            @Override
-            public void onError(Throwable throwable) {
-                future.completeExceptionally(throwable);
-            }
-
-            @Override
-            public void onCompleted() {
-                future.complete(result[0]);
-            }
-        };
+        final StreamObserver<StringResponse> responseObserver = getStringResponseStreamObserver(future);
 
         astub.alterCartGoodAmount(GoodAmountInfo.newBuilder()
                         .setUserId(userRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName()).get().getId())
@@ -274,26 +216,10 @@ public class OrdersService {
         return future;
     }
 
-    public CompletableFuture<OperationResultDTO> alterCartGoodsAmount(List<GoodAmountDTO> goods) {
-        CompletableFuture<OperationResultDTO> future = new CompletableFuture<>();
-        final OperationResultDTO[] result = new OperationResultDTO[1];
+    public CompletableFuture<String> alterCartGoodsAmount(List<GoodAmountDTO> goods) {
+        CompletableFuture<String> future = new CompletableFuture<>();
 
-        final StreamObserver<StringResponse> responseObserver = new StreamObserver<StringResponse>() {
-            @Override
-            public void onNext(StringResponse stringResponse) {
-                result[0] = new OperationResultDTO(stringResponse.getResponseCode(), stringResponse.getResponse());
-            }
-
-            @Override
-            public void onError(Throwable throwable) {
-                future.completeExceptionally(throwable);
-            }
-
-            @Override
-            public void onCompleted() {
-                future.complete(result[0]);
-            }
-        };
+        final StreamObserver<StringResponse> responseObserver = getStringResponseStreamObserver(future);
 
         final StreamObserver<GoodAmountInfo> request = astub.alterCartGoodsAmount(responseObserver);
         goods.stream()
@@ -307,26 +233,10 @@ public class OrdersService {
         return future;
     }
 
-    public CompletableFuture<OperationResultDTO> setOrderStatus(Long id, Integer status) {
-        CompletableFuture<OperationResultDTO> future = new CompletableFuture<>();
-        final OperationResultDTO[] result = new OperationResultDTO[1];
+    public CompletableFuture<String> setOrderStatus(Long id, Integer status) {
+        CompletableFuture<String> future = new CompletableFuture<>();
 
-        final StreamObserver<StringResponse> responseObserver = new StreamObserver<StringResponse>() {
-            @Override
-            public void onNext(StringResponse stringResponse) {
-                result[0] = new OperationResultDTO(stringResponse.getResponseCode(), stringResponse.getResponse());
-            }
-
-            @Override
-            public void onError(Throwable throwable) {
-                future.completeExceptionally(throwable);
-            }
-
-            @Override
-            public void onCompleted() {
-                future.complete(result[0]);
-            }
-        };
+        final StreamObserver<StringResponse> responseObserver = getStringResponseStreamObserver(future);
 
         astub.setOrderStatus(OrderStatus.newBuilder()
                         .setId(id)
@@ -335,10 +245,10 @@ public class OrdersService {
         return future;
     }
 
-    public OperationResultDTO createOrder(Boolean buyAvailable) {
+    public String createOrder(Boolean buyAvailable) {
         StringResponse response = bstub.createOrder(CreateOrderInfo.newBuilder()
                 .setUserId(userRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName()).get().getId())
                 .setBuyMax(buyAvailable).build());
-        return new OperationResultDTO(response.getResponseCode(), response.getResponse());
+        return response.getResponse();
     }
 }

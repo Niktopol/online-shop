@@ -87,8 +87,7 @@ public class GoodsService extends GoodsServiceGrpc.GoodsServiceImplBase {
             return;
         }
         responseObserver.onNext(StringResponse.newBuilder()
-                .setResponse("Good added successfully")
-                .setResponseCode(100).build());
+                .setResponse("Good added successfully").build());
         responseObserver.onCompleted();
     }
 
@@ -126,8 +125,7 @@ public class GoodsService extends GoodsServiceGrpc.GoodsServiceImplBase {
                     return;
                 }
                 responseObserver.onNext(StringResponse.newBuilder()
-                        .setResponse("Goods added successfully")
-                        .setResponseCode(100).build());
+                        .setResponse("Goods added successfully").build());
                 responseObserver.onCompleted();
             }
         };
@@ -174,8 +172,7 @@ public class GoodsService extends GoodsServiceGrpc.GoodsServiceImplBase {
             return;
         }
         responseObserver.onNext(StringResponse.newBuilder()
-                .setResponse("Good modified successfully")
-                .setResponseCode(100).build());
+                .setResponse("Good modified successfully").build());
         responseObserver.onCompleted();
     }
 
@@ -238,8 +235,7 @@ public class GoodsService extends GoodsServiceGrpc.GoodsServiceImplBase {
                     return;
                 }
                 responseObserver.onNext(StringResponse.newBuilder()
-                        .setResponse("Goods modified successfully")
-                        .setResponseCode(100).build());
+                        .setResponse("Goods modified successfully").build());
                 responseObserver.onCompleted();
             }
         };
