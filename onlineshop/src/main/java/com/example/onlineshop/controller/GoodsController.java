@@ -41,10 +41,7 @@ public class GoodsController {
     public String addGood(@Argument List<GoodAddDTO> goods) {
         if(goods.isEmpty()){
             throw new EmptyListException("Provided list must contain elements");
-        } else if (goods.size() == 1) {
-            CompletableFuture<String> future = service.addGood(goods.get(0));
-            return future.join();
-        }else{
+        } else {
             CompletableFuture<String> future = service.addGoods(goods);
             return future.join();
         }
@@ -55,10 +52,7 @@ public class GoodsController {
     public String alterGood(@Argument List<AlterGoodDTO> goods) {
         if(goods.isEmpty()){
             throw new EmptyListException("Provided list must contain elements");
-        } else if (goods.size() == 1) {
-            CompletableFuture<String> future = service.alterGood(goods.get(0));
-            return future.join();
-        }else{
+        } else{
             CompletableFuture<String> future = service.alterGoods(goods);
             return future.join();
         }

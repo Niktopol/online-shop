@@ -10,7 +10,6 @@ import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -23,12 +22,17 @@ public class GoodsService {
 
     public CompletableFuture<List<GoodDTO>> getGoodsList(){
         CompletableFuture<List<GoodDTO>> future = new CompletableFuture<>();
-        List<GoodDTO> goods = new ArrayList<>();
 
-        stub.getGoodsList(Empty.getDefaultInstance(), new StreamObserver<Good>() {
+        stub.getGoodsList(Empty.getDefaultInstance(), new StreamObserver<GoodList>() {
+            List<GoodDTO> goods;
             @Override
-            public void onNext(Good good) {
-                goods.add(new GoodDTO(good.getId(), good.getName(), good.getPrice(), good.getAmount(), good.getCanBeSold()));
+            public void onNext(GoodList goodsList) {
+                goods = goodsList.getGoodsList().stream().map(good -> new GoodDTO(
+                        good.getId(),
+                        good.getName(),
+                        good.getPrice(),
+                        good.getAmount(),
+                        good.getCanBeSold())).toList();
             }
 
             @Override
@@ -70,12 +74,17 @@ public class GoodsService {
 
     public CompletableFuture<List<GoodDTO>> findGoods(String name){
         CompletableFuture<List<GoodDTO>> future = new CompletableFuture<>();
-        List<GoodDTO> goods = new ArrayList<>();
 
-        stub.findGoods(Name.newBuilder().setName(name).build(), new StreamObserver<Good>() {
+        stub.findGoods(Name.newBuilder().setName(name).build(), new StreamObserver<GoodList>() {
+            List<GoodDTO> goods;
             @Override
-            public void onNext(Good good) {
-                goods.add(new GoodDTO(good.getId(), good.getName(), good.getPrice(), good.getAmount(), good.getCanBeSold()));
+            public void onNext(GoodList goodsList) {
+                goods = goodsList.getGoodsList().stream().map(good -> new GoodDTO(
+                        good.getId(),
+                        good.getName(),
+                        good.getPrice(),
+                        good.getAmount(),
+                        good.getCanBeSold())).toList();
             }
 
             @Override
@@ -97,21 +106,11 @@ public class GoodsService {
 
         final StreamObserver<StringResponse> responseObserver = getStringResponseStreamObserver(future);
 
-        final StreamObserver<GoodAddInfo> request = stub.addGoods(responseObserver);
-        goods.stream()
-                .map((dto) -> GoodAddInfo.newBuilder().setName(dto.getName()).setPrice(dto.getPrice()).build())
-                .forEach(request::onNext);
-        request.onCompleted();
+        stub.addGoods(GoodAddInfoList.newBuilder()
+                .addAllInfos(goods.stream().map(good -> GoodAddInfo.newBuilder()
+                        .setName(good.getName())
+                        .setPrice(good.getPrice()).build()).toList()).build(), responseObserver);
 
-        return future;
-    }
-
-    public CompletableFuture<String> addGood(GoodAddDTO good){
-        CompletableFuture<String> future = new CompletableFuture<>();
-
-        final StreamObserver<StringResponse> responseObserver = getStringResponseStreamObserver(future);
-
-        stub.addGood(GoodAddInfo.newBuilder().setName(good.getName()).setPrice(good.getPrice()).build(), responseObserver);
         return future;
     }
 
@@ -138,21 +137,9 @@ public class GoodsService {
 
         final StreamObserver<StringResponse> responseObserver = getStringResponseStreamObserver(future);
 
-        final StreamObserver<GoodAlterInfo> request = stub.alterGoods(responseObserver);
-        goods.stream()
-                .map(this::constructGoodAlterInfo)
-                .forEach(request::onNext);
-        request.onCompleted();
+        stub.alterGoods(GoodAlterInfoList.newBuilder()
+                .addAllInfos(goods.stream().map(this::constructGoodAlterInfo).toList()).build(), responseObserver);
 
-        return future;
-    }
-
-    public CompletableFuture<String> alterGood(AlterGoodDTO good){
-        CompletableFuture<String> future = new CompletableFuture<>();
-
-        final StreamObserver<StringResponse> responseObserver = getStringResponseStreamObserver(future);
-
-        stub.alterGood(constructGoodAlterInfo(good), responseObserver);
         return future;
     }
 }

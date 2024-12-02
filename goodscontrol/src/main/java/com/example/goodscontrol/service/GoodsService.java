@@ -23,16 +23,15 @@ public class GoodsService extends GoodsServiceGrpc.GoodsServiceImplBase {
     GoodsRepository repository;
 
     @Override
-    public void getGoodsList(Empty request, StreamObserver<Good> responseObserver) {
+    public void getGoodsList(Empty request, StreamObserver<com.example.types.GoodList> responseObserver) {
         List<com.example.goodscontrol.model.entity.Good> goods = repository.findAll();
-        for (com.example.goodscontrol.model.entity.Good good: goods){
-            responseObserver.onNext(Good.newBuilder()
-                    .setId(good.getId())
-                    .setName(good.getName())
-                    .setPrice(good.getPrice())
-                    .setAmount(good.getAmount())
-                    .setCanBeSold(good.getCanBeSold()).build());
-        }
+        responseObserver.onNext(GoodList.newBuilder()
+                .addAllGoods(goods.stream().map(good -> Good.newBuilder()
+                        .setId(good.getId())
+                        .setName(good.getName())
+                        .setPrice(good.getPrice())
+                        .setAmount(good.getAmount())
+                        .setCanBeSold(good.getCanBeSold()).build()).toList()).build());
         responseObserver.onCompleted();
     }
 
@@ -54,32 +53,29 @@ public class GoodsService extends GoodsServiceGrpc.GoodsServiceImplBase {
     }
 
     @Override
-    public void findGoods(Name request, StreamObserver<Good> responseObserver) {
+    public void findGoods(Name request, StreamObserver<com.example.types.GoodList> responseObserver) {
         List<com.example.goodscontrol.model.entity.Good> goods = repository.findAllByNameContainingIgnoreCase(request.getName());
-        for (com.example.goodscontrol.model.entity.Good good: goods){
-            responseObserver.onNext(Good.newBuilder()
-                    .setId(good.getId())
-                    .setName(good.getName())
-                    .setPrice(good.getPrice())
-                    .setAmount(good.getAmount())
-                    .setCanBeSold(good.getCanBeSold()).build());
-        }
+        responseObserver.onNext(GoodList.newBuilder()
+                .addAllGoods(goods.stream().map(good -> Good.newBuilder()
+                        .setId(good.getId())
+                        .setName(good.getName())
+                        .setPrice(good.getPrice())
+                        .setAmount(good.getAmount())
+                        .setCanBeSold(good.getCanBeSold()).build()).toList()).build());
         responseObserver.onCompleted();
     }
 
     @Transactional
     @Override
-    public void addGood(GoodAddInfo request, StreamObserver<StringResponse> responseObserver) {
-        com.example.goodscontrol.model.entity.Good good = new com.example.goodscontrol.model.entity.Good(
-                request.getName(),
-                request.getPrice()
-        );
+    public void addGoods(GoodAddInfoList request, StreamObserver<StringResponse> responseObserver) {
+        List<com.example.goodscontrol.model.entity.Good> goods = request.getInfosList().stream().map(good ->
+                new com.example.goodscontrol.model.entity.Good(good.getName(), good.getPrice())).toList();
         try {
-            repository.saveAndFlush(good);
+            repository.saveAllAndFlush(goods);
         } catch (DataIntegrityViolationException e){
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             responseObserver.onError(Status.ALREADY_EXISTS.withDescription(
-                    String.format("Good with name %s already exists", request.getName())).asRuntimeException());
+                    "List contains good with a name that already exists").asRuntimeException());
             return;
         } catch (Exception e){
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -87,157 +83,54 @@ public class GoodsService extends GoodsServiceGrpc.GoodsServiceImplBase {
             return;
         }
         responseObserver.onNext(StringResponse.newBuilder()
-                .setResponse("Good added successfully").build());
+                .setResponse("Goods added successfully").build());
         responseObserver.onCompleted();
     }
 
     @Transactional
-    private void saveGoods(List<com.example.goodscontrol.model.entity.Good> goods){
-        repository.saveAll(goods);
-        repository.flush();
-    }
-
     @Override
-    public StreamObserver<GoodAddInfo> addGoods(StreamObserver<StringResponse> responseObserver) {
-        return new StreamObserver<GoodAddInfo>() {
-            final List<com.example.goodscontrol.model.entity.Good> goods = new ArrayList<>();
-
-            @Override
-            public void onNext(GoodAddInfo goodAddInfo) {
-                goods.add(new com.example.goodscontrol.model.entity.Good(
-                        goodAddInfo.getName(),
-                        goodAddInfo.getPrice()));
-            }
-
-            @Override
-            public void onError(Throwable throwable) {}
-
-            @Override
-            public void onCompleted() {
-                try {
-                    saveGoods(goods);
-                } catch (DataIntegrityViolationException e){
-                    responseObserver.onError(Status.ALREADY_EXISTS.withDescription(
-                            "List contains good with a name that already exists").asRuntimeException());
-                    return;
-                } catch (Exception e){
-                    responseObserver.onError(Status.INTERNAL.withDescription("Unknown error").asRuntimeException());
-                    return;
+    public void alterGoods(GoodAlterInfoList request, StreamObserver<StringResponse> responseObserver) {
+        List<com.example.goodscontrol.model.entity.Good> goods = new ArrayList<>();
+        for (GoodAlterInfo info: request.getInfosList()){
+            Optional<com.example.goodscontrol.model.entity.Good> goodOpt = repository.findById(info.getId());
+            if (goodOpt.isPresent()){
+                if (info.hasName()) {
+                    goodOpt.get().setName(info.getName());
                 }
-                responseObserver.onNext(StringResponse.newBuilder()
-                        .setResponse("Goods added successfully").build());
-                responseObserver.onCompleted();
-            }
-        };
-    }
-
-    @Transactional
-    @Override
-    public void alterGood(GoodAlterInfo request, StreamObserver<StringResponse> responseObserver) {
-        Optional<com.example.goodscontrol.model.entity.Good> goodOpt = repository.findById(request.getId());
-        if (goodOpt.isPresent()){
-            com.example.goodscontrol.model.entity.Good good = goodOpt.get();
-            if (request.hasName()){
-                good.setName(request.getName());
-            }
-            if (request.hasPrice()){
-                good.setPrice(request.getPrice());
-            }
-            if (request.hasAmount()){
-                good.setAmount(request.getAmount());
-            }
-            if (request.hasCanBeSold()){
-                good.setCanBeSold(request.getCanBeSold());
-            }
-            try{
-                repository.saveAndFlush(good);
-            } catch (OptimisticLockException e){
-                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                responseObserver.onError(Status.INTERNAL.withDescription(
-                        "Listed good has been already modified").asRuntimeException());
-                return;
-            } catch (DataIntegrityViolationException e){
-                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                responseObserver.onError(Status.ALREADY_EXISTS.withDescription(
-                        String.format("Good with a name '%s' already exists", good.getName())).asRuntimeException());
-                return;
-            } catch (Exception e){
-                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                responseObserver.onError(Status.INTERNAL.withDescription("Unknown error").asRuntimeException());
+                if (info.hasPrice()) {
+                    goodOpt.get().setPrice(info.getPrice());
+                }
+                if (info.hasAmount()) {
+                    goodOpt.get().setAmount(info.getAmount());
+                }
+                if (info.hasCanBeSold()) {
+                    goodOpt.get().setCanBeSold(info.getCanBeSold());
+                }
+                goods.add(goodOpt.get());
+            } else {
+                responseObserver.onError(Status.NOT_FOUND.withDescription(
+                        "List contains non-existing goods").asRuntimeException());
                 return;
             }
-        }else {
-            responseObserver.onError(Status.NOT_FOUND.withDescription(
-                    String.format("Good with id %d does not exist", request.getId())).asRuntimeException());
+        }
+        try{
+            repository.saveAllAndFlush(goods);
+        } catch (OptimisticLockException e){
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            responseObserver.onError(Status.INTERNAL.withDescription(
+                    "Listed good has been already modified").asRuntimeException());
+            return;
+        } catch (DataIntegrityViolationException e){
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            responseObserver.onError(Status.ALREADY_EXISTS.withDescription(
+                    "List contains good with a name tha already exists").asRuntimeException());
+            return;
+        } catch (Exception e){
+            responseObserver.onError(Status.INTERNAL.withDescription("Unknown error").asRuntimeException());
             return;
         }
         responseObserver.onNext(StringResponse.newBuilder()
-                .setResponse("Good modified successfully").build());
+                .setResponse("Goods modified successfully").build());
         responseObserver.onCompleted();
-    }
-
-    @Transactional
-    private void saveGoodChanges(List<com.example.goodscontrol.model.entity.Good> goods){
-        repository.saveAll(goods);
-        repository.flush();
-    }
-
-    @Override
-    public io.grpc.stub.StreamObserver<GoodAlterInfo> alterGoods(StreamObserver<StringResponse> responseObserver) {
-        return new StreamObserver<GoodAlterInfo>() {
-            final List<GoodAlterInfo> goodsInfo = new ArrayList<>();
-            @Override
-            public void onNext(GoodAlterInfo goodAlterInfo) {
-                goodsInfo.add(goodAlterInfo);
-            }
-
-            @Override
-            public void onError(Throwable throwable) {}
-
-            @Override
-            public void onCompleted() {
-                List<com.example.goodscontrol.model.entity.Good> goods = new ArrayList<>();
-                for (GoodAlterInfo goodInfo: goodsInfo){
-                    Optional<com.example.goodscontrol.model.entity.Good> goodOpt = repository.findById(goodInfo.getId());
-                    if (goodOpt.isPresent()) {
-                        com.example.goodscontrol.model.entity.Good good = goodOpt.get();
-                        if (goodInfo.hasName()) {
-                            good.setName(goodInfo.getName());
-                        }
-                        if (goodInfo.hasPrice()) {
-                            good.setPrice(goodInfo.getPrice());
-                        }
-                        if (goodInfo.hasAmount()) {
-                            good.setAmount(goodInfo.getAmount());
-                        }
-                        if (goodInfo.hasCanBeSold()) {
-                            good.setCanBeSold(goodInfo.getCanBeSold());
-                        }
-                        goods.add(good);
-                    }else {
-                        responseObserver.onError(Status.NOT_FOUND.withDescription(
-                                "List contains non-existing goods").asRuntimeException());
-                        return;
-                    }
-                }
-                try{
-                    saveGoodChanges(goods);
-                } catch (OptimisticLockException e){
-                    responseObserver.onError(Status.INTERNAL.withDescription(
-                            "Listed good has been already modified").asRuntimeException());
-                    return;
-                } catch (DataIntegrityViolationException e){
-                    responseObserver.onError(Status.ALREADY_EXISTS.withDescription(
-                            "List contains good with a name tha already exists").asRuntimeException());
-                    return;
-                } catch (Exception e){
-                    responseObserver.onError(Status.INTERNAL.withDescription("Unknown error").asRuntimeException());
-                    return;
-                }
-                responseObserver.onNext(StringResponse.newBuilder()
-                        .setResponse("Goods modified successfully").build());
-                responseObserver.onCompleted();
-            }
-        };
     }
 }

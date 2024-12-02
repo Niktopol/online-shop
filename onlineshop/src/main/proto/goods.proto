@@ -9,11 +9,9 @@ option java_package = "com.example.goods";
 option java_outer_classname = "GoodsProto";
 
 service GoodsService {
-    rpc GetGoodsList (google.protobuf.Empty) returns (stream Good) {}
+    rpc GetGoodsList (google.protobuf.Empty) returns (GoodList) {}
     rpc GetGood (Id) returns (Good) {}
-    rpc FindGoods (Name) returns (stream Good) {}
-    rpc AddGood (GoodAddInfo) returns (StringResponse) {}
-    rpc AddGoods (stream GoodAddInfo) returns (StringResponse) {}
-    rpc AlterGood (GoodAlterInfo) returns (StringResponse) {}
-    rpc AlterGoods (stream GoodAlterInfo) returns (StringResponse) {}
+    rpc FindGoods (Name) returns (GoodList) {}
+    rpc AddGoods (GoodAddInfoList) returns (StringResponse) {}
+    rpc AlterGoods (GoodAlterInfoList) returns (StringResponse) {}
 }

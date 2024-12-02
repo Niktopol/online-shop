@@ -1,8 +1,14 @@
 syntax = "proto3";
 
+import "common_types.proto";
+
 option java_multiple_files = true;
 option java_package = "com.example.types";
 option java_outer_classname = "GoodTypesProto";
+
+message GoodList{
+  repeated Good goods = 1;
+}
 
 message Name{
   string name = 1;
@@ -13,10 +19,18 @@ message GoodAddInfo{
   double price = 2;
 }
 
+message GoodAddInfoList{
+  repeated GoodAddInfo infos = 1;
+}
+
 message GoodAlterInfo{
   int64 id = 1;
   optional string name = 2;
   optional double price = 3;
   optional int32 amount = 4;
   optional bool canBeSold = 5;
+}
+
+message GoodAlterInfoList{
+  repeated GoodAlterInfo infos = 1;
 }
