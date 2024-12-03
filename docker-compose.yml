@@ -1,0 +1,47 @@
+services:
+  main:
+    container_name: online-shop
+    build:
+      context: ./onlineshop
+    ports:
+      - '80:8080'
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/onlineshop
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=admin
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - GRPC_GOODS_ADDRESS=goods:8081
+      - GRPC_ORDERS_ADDRESS=orders:8082
+    depends_on:
+      - db
+      - goods
+      - orders
+  goods:
+    container_name: goods
+    build:
+      context: ./goodscontrol
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/onlineshop
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=admin
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    depends_on:
+      - db
+  orders:
+    container_name: orders
+    build:
+      context: ./ordercontrol
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/onlineshop
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=admin
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    depends_on:
+      - db
+  db:
+    image: postgres:16.0-alpine
+    container_name: db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=onlineshop
