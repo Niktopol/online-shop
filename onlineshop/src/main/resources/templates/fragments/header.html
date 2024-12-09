@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang = "ru" xmlns:th="http://www.thymeleaf.org">
+<body>
+<header th:fragment="header(role)">
+    <nav>
+        <a th:href="@{/}">Главная</a>
+        <a th:href="@{/orderslist}">Заказы</a>
+        <a th:if="${role == 'CUSTOMER'}" th:href="@{/mycart}">Корзина</a>
+    </nav>
+    <h1>Главная</h1>
+    <a th:href="@{/logout}">Выход</a>
+</header>
+</body>

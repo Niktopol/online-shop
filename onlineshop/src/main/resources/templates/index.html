@@ -4,20 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Главная</title>
-    <link rel="stylesheet" href = "header.css">
-    <link rel="stylesheet" href = "search.css">
-    <link rel="stylesheet" href = "main.css">
+    <link th:href="@{/css/header.css}" rel="stylesheet" >
+    <link th:href="@{/css/search.css}" rel="stylesheet" >
+    <link th:href="@{/css/main.css}" rel="stylesheet" >
 </head>
 <body>
-    <header>
-        <nav>
-            <a href="">Главная</a>
-            <a href="">Заказы</a>
-            <a href="">Корзина</a>
-        </nav>
-        <h1>Главная</h1>
-        <a href="">Выход</a>
-    </header>
+    <header th:replace="~{fragments/header :: header(${role})}"></header>
     <h1>Найдено товаров: 1100</h1>
     <div>
         <form id="search" action="">

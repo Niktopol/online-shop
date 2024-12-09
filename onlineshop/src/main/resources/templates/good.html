@@ -4,19 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>???</title>
-    <link rel="stylesheet" href = "header.css">
-    <link rel="stylesheet" href = "good.css">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/good.css}">
 </head>
 <body>
-    <header>
-        <nav>
-            <a href="">Главная</a>
-            <a href="">Заказы</a>
-            <a href="">Корзина</a>
-        </nav>
-        <h1></h1>
-        <a href="">Выход</a>
-    </header>
+    <header th:replace="~{fragments/header :: header(${role})}"></header>
     <div>
         <h1>DRCTFVYGBUHJNKRDTFYGUH</h1>
         <p id="statusval">Открыт к продаже</p>

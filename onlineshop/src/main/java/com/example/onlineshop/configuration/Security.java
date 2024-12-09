@@ -68,6 +68,7 @@ public class Security {
                 .authorizeHttpRequests(request ->
                         request.requestMatchers("/auth/signin", "/auth/signup", "/register").anonymous()
                                 .requestMatchers("/shop").hasAnyAuthority("OWNER", "CUSTOMER")
+                                .requestMatchers("/css/**", "/js/**").permitAll()
                                 .anyRequest().authenticated())
                 .exceptionHandling(e -> e
                         .accessDeniedHandler(
@@ -95,7 +96,7 @@ public class Security {
                 .formLogin(form -> form
                         .loginPage("/login").permitAll()
                         .failureUrl("/login?error=true")
-                        .defaultSuccessUrl("/"))
+                        .defaultSuccessUrl("/", true))
                 .logout(logout ->
                         logout.logoutUrl("/logout").permitAll().logoutSuccessHandler((request, response, authentication) -> {
                             if (request.getHeader("Accept").contains("text/html")) {

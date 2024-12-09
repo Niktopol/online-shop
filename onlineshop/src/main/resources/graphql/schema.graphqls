@@ -44,7 +44,7 @@ type Order{
 
 type OrderAndUser{
     id: Int!
-    goods: [OrderGood!]
+    goods: [OrderGood!]!
     status: Int!
     price: Float!
     userId: Int!
