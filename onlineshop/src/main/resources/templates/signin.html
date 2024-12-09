@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang = "ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход</title>
+    <link rel="stylesheet" href = "style.css">
+</head>
+<body>
+    <form action="" method="post">
+        <h1>Вход</h1>
+        <div>
+            <input type="text" id="username" name="username" placeholder="Логин" required>
+        </div>
+        <div>
+            <input type="password" id="password" name="password" placeholder="Пароль" required>
+        </div>
+        <p></p>
+        <button type="submit">Войти</button>
+        <a href="">Создать аккаунт</a>
+    </form>
+</body>
+</html>
+
+<!--
+<!DOCTYPE html>
+<html lang = "ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Login</title>
+</head>
+<body>
+    <h1>Login</h1>
+    <form th:action="@{/login}" method="post">
+        <div>
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit">Login</button>
+    </form>
+    <p th:if="${param.error}" style="color:red;">Invalid username or password</p>
+</body>
+</html>
+-->

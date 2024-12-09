@@ -19,8 +19,6 @@ import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.Session;
 import org.springframework.stereotype.Service;
 
-import java.sql.SQLException;
-
 import static com.example.onlineshop.model.entity.User.Role.CUSTOMER;
 
 @AllArgsConstructor
@@ -30,7 +28,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final SecurityContextRepository securityContextRepository;
     private final AuthenticationManager authenticationManager;
-    //private final FindByIndexNameSessionRepository<? extends Session> sessionRepository;
+    private final FindByIndexNameSessionRepository<? extends Session> sessionRepository;
 
     @Transactional
     public String createUser(User user) {
@@ -73,12 +71,7 @@ public class AuthService {
         }catch (AuthenticationException e){
             return e.getMessage();
         }
-        /*
-        if (userData.getUsername().equals("admin")){
-            for (Session i: sessionRepository.findByPrincipalName("admin").values()){
-                sessionRepository.deleteById(i.getId());
-            }
-        }*/
+
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(authentication);
         securityContextRepository.saveContext(context, request, response);

@@ -30,7 +30,7 @@ public class GraphqlStatusExceptionResolver extends DataFetcherExceptionResolver
                 builder.errorType(ErrorType.INTERNAL_ERROR).message(ex.getMessage());
             }
             return builder.build();
-        } else if(ex instanceof EmptyListException){
+        } else if(ex instanceof EmptyListException || ex instanceof IllegalArgumentException){
             return GraphqlErrorBuilder.newError()
                     .errorType(ErrorType.BAD_REQUEST)
                     .message(ex.getMessage())

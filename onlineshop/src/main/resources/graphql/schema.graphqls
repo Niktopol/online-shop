@@ -37,7 +37,7 @@ type OrderGood{
 
 type Order{
     id: Int!
-    goods: [OrderGood!]
+    goods: [OrderGood!]!
     status: Int!
     price: Float!
 }

@@ -65,42 +65,50 @@ public class Security {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(request -> {
-                    var corsConfiguration = new CorsConfiguration();
-                    corsConfiguration.setAllowedOriginPatterns(List.of("*"));
-                    corsConfiguration.setAllowedMethods(List.of("GET", "POST"));
-                    corsConfiguration.setAllowedHeaders(List.of("*"));
-                    corsConfiguration.setAllowCredentials(true);
-                    return corsConfiguration;
-                }))
                 .authorizeHttpRequests(request ->
-                        request.requestMatchers("/auth/signin", "/auth/signup").anonymous()
+                        request.requestMatchers("/auth/signin", "/auth/signup", "/register").anonymous()
                                 .requestMatchers("/shop").hasAnyAuthority("OWNER", "CUSTOMER")
-                                .anyRequest().permitAll())
+                                .anyRequest().authenticated())
                 .exceptionHandling(e -> e
                         .accessDeniedHandler(
                         (request, response, accessDeniedException) -> {
-                            response.setContentType(MediaType.TEXT_PLAIN_VALUE);
-                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                            response.getWriter().write("Access denied");
+                            if (request.getHeader("Accept").contains("text/html")) {
+                                response.sendRedirect("/login");
+                            } else {
+                                response.setContentType(MediaType.TEXT_PLAIN_VALUE);
+                                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                                response.getWriter().write("Access denied");
+                            }
                         })
                         .authenticationEntryPoint((request, response, accessDeniedException) -> {
-                            response.setContentType(MediaType.TEXT_PLAIN_VALUE);
-                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                            response.getWriter().write("Access denied");
+                            if (request.getHeader("Accept").contains("text/html")) {
+                                response.sendRedirect("/login");
+                            } else {
+                                response.setContentType(MediaType.TEXT_PLAIN_VALUE);
+                                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                                response.getWriter().write("Access denied");
+                            }
                         })
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+                .formLogin(form -> form
+                        .loginPage("/login").permitAll()
+                        .failureUrl("/login?error=true")
+                        .defaultSuccessUrl("/"))
                 .logout(logout ->
-                        logout.logoutUrl("/auth/signout").logoutSuccessHandler((request, response, authentication) -> {
-                            response.setContentType(MediaType.TEXT_PLAIN_VALUE);
-                            if(authentication != null && authentication.isAuthenticated()){
-                                response.setStatus(HttpServletResponse.SC_OK);
-                                response.getWriter().write("Signed out successfully");
-                            }else{
-                                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                                response.getWriter().write("You are not signed in");
+                        logout.logoutUrl("/logout").permitAll().logoutSuccessHandler((request, response, authentication) -> {
+                            if (request.getHeader("Accept").contains("text/html")) {
+                                response.sendRedirect("/login");
+                            } else {
+                                response.setContentType(MediaType.TEXT_PLAIN_VALUE);
+                                if(authentication != null && authentication.isAuthenticated()){
+                                    response.setStatus(HttpServletResponse.SC_OK);
+                                    response.getWriter().write("Signed out successfully");
+                                } else {
+                                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                                    response.getWriter().write("You are not signed in");
+                                }
                             }
                         }).invalidateHttpSession(true));
 

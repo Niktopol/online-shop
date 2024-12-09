@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang = "ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заказы</title>
+    <link rel="stylesheet" href = "header.css">
+    <link rel="stylesheet" href = "search.css">
+    <link rel="stylesheet" href = "orders.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="">Главная</a>
+            <a href="">Заказы</a>
+            <a href="">Корзина</a>
+        </nav>
+        <h1>Заказы</h1>
+        <a href="">Выход</a>
+    </header>
+    <h1>Найдено заказов: 1100</h1>
+    <div>
+        <form id="search" action="">
+            <div><input type="number" name="name" placeholder="Минимальный статус"></div>
+            <div><input type="number" name="name" placeholder="Максимальный статус"></div>
+            <button type="submit">Найти</button>
+        </form>
+        <div class="item">
+            <p>Заказ №</p>
+            <div class="goods">
+                <p>Купленные товары:</p>
+                <div class="good">
+                    <a href="das">вфывфы</a>
+                    <div class="numbers">
+                        <p>Количество: шт.</p>
+                        <p>Стоимость: ₽</p>
+                    </div>
+                </div>
+            </div>
+            <p>Статус: </p>
+            <p>Стоимость: ₽</p>
+        </div>
+        <div class="item">
+            <p>Заказ №</p>
+            <div class="goods">
+                <p>Купленные товары:</p>
+                <div class="good">
+                    <a href="das">вфывфы</a>
+                    <div class="numbers">
+                        <p>Количество: шт.</p>
+                        <p>Стоимость: ₽</p>
+                    </div>
+                </div>
+            </div>
+            <p>Статус: </p>
+            <p>Стоимость: ₽</p>
+        </div>
+        <div class="item">
+            <p>Заказ №</p>
+            <div class="goods">
+                <p>Товары:</p>
+                <div class="good">
+                    <a href="das">вфывфы</a>
+                    <div class="numbers">
+                        <p>Количество: шт.</p>
+                        <p>Стоимость: ₽</p>
+                    </div>
+                </div>
+            </div>
+            <p>Стоимость: ₽</p>
+            <p>ID заказчика: </p>
+            <select id="statuses">
+                <option value="0">Созднан</option>
+                <option value="1">Собран</option>
+                <option value="2">Отправлен</option>
+                <option value="3">Прибыл</option>
+            </select>
+            <button>Назначить статус</button>
+        </div>
+    </div>
+</body>
+</html>

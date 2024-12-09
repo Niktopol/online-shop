@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang = "ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>???</title>
+    <link rel="stylesheet" href = "header.css">
+    <link rel="stylesheet" href = "good.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="">Главная</a>
+            <a href="">Заказы</a>
+            <a href="">Корзина</a>
+        </nav>
+        <h1></h1>
+        <a href="">Выход</a>
+    </header>
+    <div>
+        <h1>DRCTFVYGBUHJNKRDTFYGUH</h1>
+        <p id="statusval">Открыт к продаже</p>
+        <p id="priceval">Цена: ₽</p>
+        <p id="amountval">Осталось: шт.</p>
+        <form>
+            <div>
+                <label for="name">Название:</label>
+                <input type="text" id="name" name="name" placeholder="">
+            </div>
+            <div>
+                <label for="price">Цена:</label>
+                <input type="text" id="price" name="price" placeholder="">
+            </div>
+            <div>
+                <label for="amount">Количество:</label>
+                <input type="text" id="amount" name="amount" placeholder="">
+            </div>
+            <select id="statuses">
+                <option>Открыт к продаже</option>
+                <option>Не продаётся</option>
+            </select>
+            <button type="submit">Внести изменения</button>
+        </form>
+    </div>
+</body>
+</html>
