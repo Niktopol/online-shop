@@ -35,7 +35,10 @@
                 <option value="1" th:selected="${good.canBeSold}">Открыт к продаже</option>
                 <option value="0" th:selected="${!good.canBeSold}">Не продаётся</option>
             </select>
-            <p></p>
+            <p th:if="${param.alterr}" th:text="'Произошла ошибка, попробуйте ещё раз'" style="color: #af3535;"></p>
+            <p th:if="${param.errnum}" th:text="'Цена и количество должны быть числами'" style="color: #af3535;"></p>
+            <p th:if="${param.errtkn}" th:text="'Товар с таким названием уже существует'" style="color: #af3535;"></p>
+            <p th:if="${param.addsucc}" th:text="'Товар обновлён'" style="color: #00ff00;"></p>
             <button type="submit">Внести изменения</button>
         </form>
     </div>

@@ -67,6 +67,10 @@ body > div{
     border-bottom: 2px solid #8f8f9d;
 }
 
+.notav {
+    color: #424242;
+}
+
 .goods > .good > .numbers{
     display: flex;
     font-size: 17px;

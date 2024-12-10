@@ -25,7 +25,8 @@ body > div{
 
 body > div > h1{
     width: calc(90% - 3em);
-    padding: 1em 1.5em;
+    font-size: 40px;
+    padding: 0.8em 1.2em;
     border-bottom: 2px solid #8f8f9d;
 }
 
@@ -44,9 +45,8 @@ body > div > h1{
 
 body > div > button{
     font-size: 20px;
-    width: 17em;
     padding: 0.1em 0.3em;
-    margin: 0 calc(10% - 1em);
+    margin-left: 10%;
     border: 1px solid #8f8f9d;
     border-radius: 2px;
     align-self: flex-start;

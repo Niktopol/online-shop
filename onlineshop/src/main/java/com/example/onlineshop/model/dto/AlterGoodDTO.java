@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AlterGoodDTO {
-    Integer id;
+    Long id;
     String name;
     Double price;
     Integer amount;

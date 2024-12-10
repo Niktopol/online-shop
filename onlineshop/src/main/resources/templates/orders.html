@@ -10,62 +10,61 @@
 </head>
 <body>
     <header th:replace="~{fragments/header :: header(${role}, 'Заказы')}"></header>
-    <h1>Найдено заказов: 1100</h1>
+    <h1 th:text="'Найдено заказов: ' + ${numfound}"></h1>
     <div>
-        <form id="search" action="">
-            <div><input type="number" name="name" placeholder="Минимальный статус"></div>
-            <div><input type="number" name="name" placeholder="Максимальный статус"></div>
+        <form th:if="${role == 'OWNER'}" id="search">
+            <select name="minStat">
+                <option value="0" th:selected="${(minStat != null) and (minStat == 0)}">Созднан</option>
+                <option value="1" th:selected="${(minStat != null) and (minStat == 1)}">Собран</option>
+                <option value="2" th:selected="${(minStat != null) and (minStat == 2)}">Отправлен</option>
+                <option value="3" th:selected="${(minStat != null) and (minStat == 3)}">Прибыл</option>
+            </select>
+            <select name="maxStat">
+                <option value="0" th:selected="${(maxStat != null) and (maxStat == 0)}">Созднан</option>
+                <option value="1" th:selected="${(maxStat != null) and (maxStat == 1)}">Собран</option>
+                <option value="2" th:selected="${(maxStat != null) and (maxStat == 2)}">Отправлен</option>
+                <option value="3" th:selected="${(maxStat != null) and (maxStat == 3)}">Прибыл</option>
+            </select>
             <button type="submit">Найти</button>
         </form>
-        <div class="item">
-            <p>Заказ №</p>
+        <p th:if="${error}" style="color: #af3535;">Нет соединения с сервисом. Пожалуйста, попробуйте позже</p>
+        <div th:if="${role == 'CUSTOMER'}" th:each="order : ${orders}" class="item">
+            <p th:text="'Заказ №' + ${order.id}"></p>
             <div class="goods">
                 <p>Купленные товары:</p>
-                <div class="good">
-                    <a href="das">вфывфы</a>
+                <div th:each="good : ${order.goods}" class="good">
+                    <a th:href="@{'/good/' + ${good.good.id}}" th:text="${good.good.name}" th:classappend="${good.good.canBeSold} ? '' : 'notav'"></a>
                     <div class="numbers">
-                        <p>Количество: шт.</p>
-                        <p>Стоимость: ₽</p>
+                        <p th:text="'Количество: ' + ${good.amount} + ' шт.'"></p>
+                        <p th:text="'Стоимость: ' + ${good.price} + ' ₽'"></p>
                     </div>
                 </div>
             </div>
-            <p>Статус: </p>
-            <p>Стоимость: ₽</p>
+            <p th:if="${order.status == 0}" th:text="'Статус: Созднан'"></p>
+            <p th:if="${order.status == 1}" th:text="'Статус: Собран'"></p>
+            <p th:if="${order.status == 2}" th:text="'Статус: Отправлен'"></p>
+            <p th:if="${order.status == 3}" th:text="'Статус: Прибыл'"></p>
+            <p th:text="'Стоимость: ' + ${order.price} + ' ₽'"></p>
         </div>
-        <div class="item">
-            <p>Заказ №</p>
-            <div class="goods">
-                <p>Купленные товары:</p>
-                <div class="good">
-                    <a href="das">вфывфы</a>
-                    <div class="numbers">
-                        <p>Количество: шт.</p>
-                        <p>Стоимость: ₽</p>
-                    </div>
-                </div>
-            </div>
-            <p>Статус: </p>
-            <p>Стоимость: ₽</p>
-        </div>
-        <div class="item">
-            <p>Заказ №</p>
+        <div th:if="${role == 'OWNER'}" th:each="order : ${orders}" class="item">
+            <p th:text="'Заказ №' + ${order.id}"></p>
             <div class="goods">
                 <p>Товары:</p>
-                <div class="good">
-                    <a href="das">вфывфы</a>
+                <div th:each="good : ${order.goods}" class="good">
+                    <a th:href="@{'/good/' + ${good.good.id}}" th:text="${good.good.name}" th:classappend="${good.good.canBeSold} ? '' : 'notav'"></a>
                     <div class="numbers">
-                        <p>Количество: шт.</p>
-                        <p>Стоимость: ₽</p>
+                        <p th:text="'Количество: ' + ${good.amount} + ' шт.'"></p>
+                        <p th:text="'Стоимость: ' + ${good.price} + ' ₽'"></p>
                     </div>
                 </div>
             </div>
-            <p>Стоимость: ₽</p>
-            <p>ID заказчика: </p>
+            <p th:text="'Стоимость: ' + ${order.price} + ' ₽'"></p>
+            <p th:text="'ID заказчика: ' + ${order.userId}"></p>
             <select id="statuses">
-                <option value="0">Созднан</option>
-                <option value="1">Собран</option>
-                <option value="2">Отправлен</option>
-                <option value="3">Прибыл</option>
+                <option value="0" th:selected="${order.status == 0}">Созднан</option>
+                <option value="1" th:selected="${order.status == 1}">Собран</option>
+                <option value="2" th:selected="${order.status == 2}">Отправлен</option>
+                <option value="3" th:selected="${order.status == 3}">Прибыл</option>
             </select>
             <button>Назначить статус</button>
         </div>
