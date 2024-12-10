@@ -68,7 +68,7 @@ public class Security {
                 .authorizeHttpRequests(request ->
                         request.requestMatchers("/auth/signin", "/auth/signup", "/register").anonymous()
                                 .requestMatchers("/shop").hasAnyAuthority("OWNER", "CUSTOMER")
-                                .requestMatchers("/css/**", "/js/**").permitAll()
+                                .requestMatchers("/css/**", "/js/**", "/login").permitAll()
                                 .anyRequest().authenticated())
                 .exceptionHandling(e -> e
                         .accessDeniedHandler(

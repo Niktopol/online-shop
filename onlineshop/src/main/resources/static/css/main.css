@@ -30,6 +30,41 @@ body > div{
     background-color: #fff;
 }
 
+#goodadd *{
+    font-size: 20px;
+}
+
+#goodadd{
+    width: calc(95% - 1em);
+    display: flex;
+    flex-direction: column;
+    font-size: 20px;
+    gap: 0.5em;
+    padding: 0.5em;
+    border: 2px solid #8f8f9d;
+    border-radius: 5px;
+}
+
+#goodadd > div > input{
+    width: calc(100% - 4px - 0.6em);
+    padding: 0.1em 0.3em;
+    outline: none;
+    border: 2px solid #8f8f9d;
+    border-radius: 2px;
+}
+
+#goodadd > button{
+    width: 6em;
+    padding: 0.1em 0.3em;
+    border: 1px solid #8f8f9d;
+    border-radius: 2px;
+    background-color: #e9e9ed;
+}
+
+#goodadd > button:hover{
+    background-color: #d0d0d7;
+}
+
 .item {
     width: 90%;
     display: flex;

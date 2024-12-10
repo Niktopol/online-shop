@@ -18,6 +18,7 @@ import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.Session;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import static com.example.onlineshop.model.entity.User.Role.CUSTOMER;
 
@@ -35,11 +36,13 @@ public class AuthService {
         try{
             userRepository.save(user);
         }catch (Exception e){
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return String.format("Username '%s' is already taken", user.getUsername());
         }
         return "";
     }
 
+    @Transactional
     public String signUp(UserDTO userData) {
         if (userData.getName().isEmpty()){
             return "'name' value is required";
@@ -51,7 +54,7 @@ public class AuthService {
             return "'password' value is required";
         }
         User user = new User(userData.getName(), userData.getUsername(),
-                passwordEncoder.encode(userData.getPassword()), CUSTOMER, true);
+                passwordEncoder.encode(userData.getPassword()), CUSTOMER);
 
         return createUser(user);
     }

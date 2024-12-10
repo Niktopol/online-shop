@@ -3,34 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>???</title>
+    <title th:if="${error}">Не найдено</title>
+    <title th:if="${error == null}" th:text="${good.name}"></title>
     <link rel="stylesheet" th:href="@{/css/header.css}">
     <link rel="stylesheet" th:href="@{/css/good.css}">
 </head>
 <body>
-    <header th:replace="~{fragments/header :: header(${role})}"></header>
+    <header th:replace="~{fragments/header :: header(${role}, '')}"></header>
     <div>
-        <h1>DRCTFVYGBUHJNKRDTFYGUH</h1>
-        <p id="statusval">Открыт к продаже</p>
-        <p id="priceval">Цена: ₽</p>
-        <p id="amountval">Осталось: шт.</p>
-        <form>
+        <p th:if="${error}" style="font-size: 20px; color: #af3535;">Товар не найден</p>
+        <h1 th:if="${(error == null) and (role == 'CUSTOMER')}" th:text="${good.name}"></h1>
+        <p th:if="${(error == null) and (role == 'CUSTOMER') and good.canBeSold}" id="statusval">Открыт к продаже</p>
+        <p th:if="${(error == null) and (role == 'CUSTOMER') and !good.canBeSold}" id="statusval">Не продаётся</p>
+        <p th:if="${(error == null) and (role == 'CUSTOMER')}" id="priceval" th:text="'Цена: ' + ${good.price} + ' ₽'"></p>
+        <p th:if="${(error == null) and (role == 'CUSTOMER')}" id="amountval" th:text="'Осталось: ' + ${good.amount} + ' шт.'"></p>
+        <button th:if="${(error == null) and (role == 'CUSTOMER')}" th:attr="goodid=${good.id}" class="notin">Добавить в корзину</button>
+        <form th:if="${(error == null) and (role == 'OWNER')}" method="post">
             <div>
                 <label for="name">Название:</label>
-                <input type="text" id="name" name="name" placeholder="">
+                <input type="text" id="name" name="name" th:placeholder="${good.name}">
             </div>
             <div>
                 <label for="price">Цена:</label>
-                <input type="text" id="price" name="price" placeholder="">
+                <input type="text" id="price" name="price" th:placeholder="${good.price}">
             </div>
             <div>
                 <label for="amount">Количество:</label>
-                <input type="text" id="amount" name="amount" placeholder="">
+                <input type="text" id="amount" name="amount" th:placeholder="${good.amount}">
             </div>
-            <select id="statuses">
-                <option>Открыт к продаже</option>
-                <option>Не продаётся</option>
+            <select id="statuses" name="canBeSold">
+                <option value="1" th:selected="${good.canBeSold}">Открыт к продаже</option>
+                <option value="0" th:selected="${!good.canBeSold}">Не продаётся</option>
             </select>
+            <p></p>
             <button type="submit">Внести изменения</button>
         </form>
     </div>

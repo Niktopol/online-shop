@@ -16,6 +16,7 @@
             <input type="password" id="password" name="password" placeholder="Пароль" required>
         </div>
         <p th:if="${param.error}">Неверный логин или пароль</p>
+        <p th:if="${param.success}" style="color: #00ff00;">Аккаунт создан</p>
         <button type="submit">Войти</button>
         <a th:href="@{/register}">Создать аккаунт</a>
     </form>

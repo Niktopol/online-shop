@@ -18,7 +18,7 @@
         <div>
             <input type="password" id="password" name="password" placeholder="Пароль" required>
         </div>
-        <p></p>
+        <p th:if="${error}" th:text="${msg}"></p>
         <button type="submit">Зарегистрироваться</button>
         <a th:href="@{/login}">Войти в аккаунт</a>
     </form>

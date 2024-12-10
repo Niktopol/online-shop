@@ -9,7 +9,7 @@
     <link rel="stylesheet" th:href="@{/css/orders.css}">
 </head>
 <body>
-    <header th:replace="~{fragments/header :: header(${role})}"></header>
+    <header th:replace="~{fragments/header :: header(${role}, 'Заказы')}"></header>
     <h1>Найдено заказов: 1100</h1>
     <div>
         <form id="search" action="">

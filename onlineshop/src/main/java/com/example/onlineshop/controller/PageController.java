@@ -1,8 +1,15 @@
 package com.example.onlineshop.controller;
 
+import com.example.onlineshop.model.dto.AlterGoodDTO;
+import com.example.onlineshop.model.dto.GoodAddDTO;
 import com.example.onlineshop.model.dto.GoodDTO;
+import com.example.onlineshop.model.dto.UserDTO;
+import com.example.onlineshop.model.entity.User;
+import com.example.onlineshop.service.AuthService;
 import com.example.onlineshop.service.GoodsService;
 import com.example.onlineshop.service.OrdersService;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import lombok.AllArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -11,7 +18,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.concurrent.CompletionException;
@@ -21,6 +30,7 @@ import java.util.concurrent.CompletionException;
 public class PageController {
     GoodsService goodsService;
     OrdersService ordersService;
+    AuthService authService;
 
     @GetMapping("/login")
     public String login() {
@@ -35,6 +45,22 @@ public class PageController {
     @GetMapping("/register")
     public String register() {
         return "signup";
+    }
+
+    @PostMapping("/register")
+    public String createAccount(UserDTO userData, Model model) {
+        if (userData.getName().isEmpty() || userData.getUsername().isEmpty() || userData.getPassword().isEmpty()){
+            model.addAttribute("error", true);
+            model.addAttribute("msg", "Пожалуйста, заполните все поля");
+            return "signup";
+        }
+        if (authService.signUp(userData).isEmpty()){
+            return "redirect:/login?success=true";
+        } else {
+            model.addAttribute("error", true);
+            model.addAttribute("msg", "Указанный логин занят");
+            return "signup";
+        }
     }
 
     @GetMapping("/")
@@ -63,11 +89,55 @@ public class PageController {
         return "index";
     }
 
+    @PreAuthorize("hasAuthority('OWNER')")
+    @PostMapping("/")
+    public String addGood(@RequestParam String name, @RequestParam String price, Model model) {
+        if (name.isEmpty() || price.isEmpty()){
+            return "redirect:/?errempt=true";
+        }else{
+            double priceNum;
+            try{
+                priceNum = Double.parseDouble(price);
+            } catch (NumberFormatException e){
+                return "redirect:/?errnum=true";
+            }
+            try{
+                goodsService.addGoods(List.of(new GoodAddDTO(name, priceNum))).join();
+            } catch (CompletionException e){
+                if (e.getCause() instanceof StatusRuntimeException){
+                    if (((StatusRuntimeException) e.getCause()).getStatus().getCode() == Status.Code.ALREADY_EXISTS){
+                        return "redirect:/?errtkn=true";
+                    } else {
+                        return "redirect:/?adderr=true";
+                    }
+                } else {
+                    return "redirect:/?adderr=true";
+                }
+            } catch (Exception e){
+                return "redirect:/?adderr=true";
+            }
+            return "redirect:/?addsucc=true";
+        }
+    }
+
     @GetMapping("/good/{id}")
-    public String goods(@PathVariable Integer id, Model model) {
+    public String goods(@PathVariable Long id, Model model) {
         model.addAttribute("role",
                 SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream().findFirst().get().toString());
+        try {
+            GoodDTO good = goodsService.getGood(id).join();
+            model.addAttribute("good", good);
+        } catch (CompletionException e){
+            model.addAttribute("error", true);
+        }
         return "good";
+    }
+
+    @PostMapping("/good/{id}")
+    public String goodsUpdate(@PathVariable Long id, AlterGoodDTO data, Model model){
+
+
+        return "redirect:/good/" + id;
     }
 
     @GetMapping("/orderslist")

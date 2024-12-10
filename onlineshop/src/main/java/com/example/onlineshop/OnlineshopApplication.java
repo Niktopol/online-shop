@@ -24,7 +24,7 @@ public class OnlineshopApplication {
 
 	@PostConstruct
 	public void initAdmin(){
-		User admin = userRepository.findByUsername("admin").orElse(new User("admin", "admin", "", OWNER, true));
+		User admin = userRepository.findByUsername("admin").orElse(new User("admin", "admin", "", OWNER));
 		Random random = new Random();
 		String dict = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 		String password = random.ints(0, dict.length())

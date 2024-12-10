@@ -9,13 +9,38 @@
     <link th:href="@{/css/main.css}" rel="stylesheet" >
 </head>
 <body>
-    <header th:replace="~{fragments/header :: header(${role})}"></header>
-    <h1>Найдено товаров: 1100</h1>
+    <header th:replace="~{fragments/header :: header(${role}, 'Главная')}"></header>
+    <h1 th:text="'Найдено товаров: ' + ${numfound}"></h1>
     <div>
-        <form id="search" action="">
-            <div><input type="text" name="name" placeholder="Название"></div>
+        <form id="search">
+            <div><input type="text" name="name" placeholder="Название" th:value="${param.name}"></div>
             <button type="submit">Найти</button>
         </form>
+        <p th:if="${error}" style="color: #af3535;">Нет соединения с сервисом. Пожалуйста, попробуйте позже</p>
+        <form th:if="${(error == null) and (role == 'OWNER')}" method="post" id="goodadd">
+            <p>Добавить товар:</p>
+            <div>
+                <input type="text" id="name" name="name" placeholder="Название" required>
+            </div>
+            <div>
+                <input type="text" id="price" name="price" placeholder="Цена" required>
+            </div>
+            <p th:if="${param.adderr}" th:text="'Произошла ошибка, попробуйте ещё раз'" style="color: #af3535;"></p>
+            <p th:if="${param.errnum}" th:text="'Цена должна быть числом'" style="color: #af3535;"></p>
+            <p th:if="${param.errempt}" th:text="'Пожалуйста, заполните все поля'" style="color: #af3535;"></p>
+            <p th:if="${param.errtkn}" th:text="'Товар с таким названием уже существует'" style="color: #af3535;"></p>
+            <p th:if="${param.addsucc}" th:text="'Товар добавлен'" style="color: #00ff00;"></p>
+            <button type="submit">Добавить</button>
+        </form>
+        <div th:each="item : ${goods}" class="item">
+            <a th:href="@{'/good/' + ${item.id}}" th:text="${item.name}" th:classappend="${item.canBeSold} ? '' : 'notav'"></a>
+            <div class="numbers">
+                <p th:text="'Цена: ' + ${item.price} + ' ₽'"></p>
+                <p th:text="'Осталось: ' + ${item.amount} + ' шт.'"></p>
+            </div>
+            <button th:if="${role == 'CUSTOMER'}" th:attr="goodid=${item.id}" class="notin">Добавить в корзину</button>
+        </div>
+        <!-- 
         <div class="item">
             <a href="dsad" class="notav">цыуевкнаегпншрощлщ</a>
             <div class="numbers">
@@ -32,6 +57,7 @@
             </div>
             <button class="in">В корзине</button>
         </div>
+        -->
     </div>
 </body>
 </html>

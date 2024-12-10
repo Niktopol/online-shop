@@ -40,10 +40,29 @@ body > div > h1{
     width: calc(80% - 2em);
     padding: 0 1em;
     font-size: 22px;
-} 
+}
+
+body > div > button{
+    font-size: 20px;
+    width: 17em;
+    padding: 0.1em 0.3em;
+    margin: 0 calc(10% - 1em);
+    border: 1px solid #8f8f9d;
+    border-radius: 2px;
+    align-self: flex-start;
+}
+
+.notin {
+    cursor: pointer;
+    background-color: #e9e9ed;
+}
+.notin:hover {
+    background-color: #d0d0d7;
+}
 
 body > div > form{
-    width: 80%;
+    width: calc(80% - 1em);
+    padding: 0.5em;
     display: flex;
     flex-direction: column;
     gap: 0.5em;
