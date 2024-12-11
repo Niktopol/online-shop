@@ -92,7 +92,7 @@ public class PageController {
         }else{
             double priceNum;
             try{
-                priceNum = Double.parseDouble(price);
+                priceNum = Math.round(Double.parseDouble(price) * 100.0) / 100.0;
             } catch (NumberFormatException e){
                 return "redirect:/?errnum=true";
             }
@@ -142,7 +142,7 @@ public class PageController {
 
         if (!price.isEmpty()){
             try {
-                data.setPrice(Double.parseDouble(price));
+                data.setPrice(Math.round(Double.parseDouble(price) * 100.0) / 100.0);
             } catch (NumberFormatException e) {
                 return "redirect:/good/" + id + "?errnum=true";
             }
@@ -210,6 +210,8 @@ public class PageController {
                     max = Integer.parseInt(maxStat);
                     if (min > max){
                         return "redirect:/orderslist?minStat=" + max + "&maxStat=" + max;
+                    } else if(min < 0 || min > 3 || max > 3){
+                        return "redirect:/orderslist";
                     } else {
                         model.addAttribute("minStat", min);
                         model.addAttribute("maxStat", max);
@@ -248,6 +250,13 @@ public class PageController {
     public String cart(Model model) {
         model.addAttribute("role",
                 SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream().findFirst().get().toString());
-        return "cart";
+        try {
+            List<CartGoodDTO> goods = ordersService.getCart().join();
+            model.addAttribute("goods", goods);
+            return "cart";
+        } catch (Exception e){
+            model.addAttribute("error", true);
+            return "cart";
+        }
     }
 }

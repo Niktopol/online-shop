@@ -42,6 +42,9 @@ public class GoodsController {
         if(goods.isEmpty()){
             throw new EmptyListException("Provided list must contain elements");
         } else {
+            for (GoodAddDTO good: goods){
+                good.setPrice(Math.round(good.getPrice() * 100.0) / 100.0);
+            }
             CompletableFuture<String> future = service.addGoods(goods);
             return future.join();
         }
@@ -53,6 +56,14 @@ public class GoodsController {
         if(goods.isEmpty()){
             throw new EmptyListException("Provided list must contain elements");
         } else{
+            for (AlterGoodDTO good: goods){
+                if (good.getAmount() != null && good.getAmount() < 0){
+                    throw new IllegalArgumentException("Good amount can't be less than 0");
+                }
+                if (good.getPrice() != null){
+                    good.setPrice(Math.round(good.getPrice() * 100.0) / 100.0);
+                }
+            }
             CompletableFuture<String> future = service.alterGoods(goods);
             return future.join();
         }

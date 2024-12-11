@@ -70,6 +70,11 @@ public class OrdersController {
         if(goods.isEmpty()){
             throw new EmptyListException("Provided list must contain elements");
         } else{
+            for (GoodAmountDTO good: goods){
+                if (good.getAmount() != null && good.getAmount() <= 0){
+                    throw new IllegalArgumentException("Good amount in the cart can't be less than 1");
+                }
+            }
             CompletableFuture<String> future = service.alterCartGoodsAmount(goods);
             return future.join();
         }
@@ -78,6 +83,9 @@ public class OrdersController {
     @PreAuthorize("hasAuthority('OWNER')")
     @MutationMapping
     public String setOrderStatus(@Argument Long id, @Argument Integer status){
+        if (status < 0 || status > 3){
+            throw new IllegalArgumentException("Status can't be less than 0 and greater than 3");
+        }
         return service.setOrderStatus(id, status).join();
     }
 

@@ -10,35 +10,24 @@
 <body>
     <header th:replace="~{fragments/header :: header(${role}, 'Корзина')}"></header>
     <div>
-        <div class="item">
-            <a href="dsad" class="notav">цыуевкнаегпншрощлщ</a>
+        <p th:if="${(error == null) and (goods.isEmpty())}" id="empt">Корзина пуста</p>
+        <p th:if="${error}" style="color: #af3535; padding: 1em;">Нет соединения с сервисом. Пожалуйста, попробуйте позже</p>
+        <div th:each="item : ${goods}" class="item">
+            <a th:href="@{'/good/' + ${item.good.id}}" th:text="${item.good.name}" th:classappend="${item.good.canBeSold} ? '' : 'notav'"></a>
             <div class="numbers">
-                <p>Цена: ₽</p>
-                <p>Осталось: шт.</p>
+                <p th:text="'Цена: ' + ${item.good.price} + ' ₽'" class="price"></p>
+                <p th:text="'Осталось: ' + ${item.good.amount} + ' шт.'"></p>
             </div>
             <div class="counter">
                 <button>-</button>
-                <span>1</span>
-                <button>+</button>
-            </div>
-            <button>Удалить</button>
-        </div>
-        <div class="item">
-            <a href="dsad" >увкаемпрниотльдбжю</a>
-            <div class="numbers">
-                <p>Цена: ₽</p>
-                <p>Осталось: шт.</p>
-            </div>
-            <div class="counter">
-                <button>-</button>
-                <span>1</span>
+                <span th:text="${item.amount}"></span>
                 <button>+</button>
             </div>
             <button>Удалить</button>
         </div>
         <h1>
             Итоговая стоимость:
-            <span> ₽</span>
+            <span id="totprice">0</span> ₽
         </h1>
     </div>
 </body>
