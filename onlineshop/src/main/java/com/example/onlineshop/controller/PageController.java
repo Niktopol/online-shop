@@ -44,6 +44,9 @@ public class PageController {
 
     @PostMapping("/register")
     public String createAccount(UserDTO userData, Model model) {
+        userData.setName(userData.getName().strip());
+        userData.setUsername(userData.getUsername().strip());
+        userData.setPassword(userData.getPassword().strip());
         if (userData.getName().isEmpty() || userData.getUsername().isEmpty() || userData.getPassword().isEmpty()){
             model.addAttribute("error", true);
             model.addAttribute("msg", "Пожалуйста, заполните все поля");
@@ -63,6 +66,7 @@ public class PageController {
         model.addAttribute("role",
                 SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream().findFirst().get().toString());
         if (name != null){
+            name = name.strip();
             try{
                 List<GoodDTO> goods = goodsService.findGoods(name).join();
                 model.addAttribute("goods", goods);
@@ -87,12 +91,16 @@ public class PageController {
     @PreAuthorize("hasAuthority('OWNER')")
     @PostMapping("/")
     public String addGood(@RequestParam String name, @RequestParam String price) {
+        name = name.strip();
         if (name.isEmpty() || price.isEmpty()){
             return "redirect:/?errempt=true";
         }else{
             double priceNum;
             try{
                 priceNum = Math.round(Double.parseDouble(price) * 100.0) / 100.0;
+                if (priceNum < 0){
+                    throw new NumberFormatException();
+                }
             } catch (NumberFormatException e){
                 return "redirect:/?errnum=true";
             }
@@ -137,12 +145,15 @@ public class PageController {
         AlterGoodDTO data = new AlterGoodDTO(id, null, null, null, null);
 
         if (!name.isEmpty()){
-            data.setName(name);
+            data.setName(name.strip());
         }
 
         if (!price.isEmpty()){
             try {
                 data.setPrice(Math.round(Double.parseDouble(price) * 100.0) / 100.0);
+                if (data.getPrice() < 0) {
+                    throw new NumberFormatException();
+                }
             } catch (NumberFormatException e) {
                 return "redirect:/good/" + id + "?errnum=true";
             }
@@ -151,6 +162,9 @@ public class PageController {
         if (!amount.isEmpty()){
             try {
                 data.setAmount(Integer.parseInt(amount));
+                if (data.getAmount() < 0) {
+                    throw new NumberFormatException();
+                }
             } catch (NumberFormatException e) {
                 return "redirect:/good/" + id + "?errnum=true";
             }
@@ -258,5 +272,22 @@ public class PageController {
             model.addAttribute("error", true);
             return "cart";
         }
+    }
+
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @PostMapping("/mycart")
+    public String orderCreate(@RequestParam(required = false) String buyall) {
+        try {
+            ordersService.createOrder(!(buyall == null));
+        } catch (StatusRuntimeException e){
+            if (e.getStatus().getCode() == Status.Code.INVALID_ARGUMENT){
+                return "redirect:/mycart?errnum=true";
+            } else {
+                return "redirect:/mycart?err=true";
+            }
+        } catch (Exception e){
+            return "redirect:/mycart?err=true";
+        }
+        return "redirect:/mycart?success=true";
     }
 }

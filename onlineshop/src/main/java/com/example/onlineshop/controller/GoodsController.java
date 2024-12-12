@@ -33,7 +33,7 @@ public class GoodsController {
 
     @QueryMapping
     public List<GoodDTO> findGoods(@Argument String name){
-        return service.findGoods(name).join();
+        return service.findGoods(name.strip()).join();
     }
 
     @PreAuthorize("hasAuthority('OWNER')")
@@ -43,6 +43,10 @@ public class GoodsController {
             throw new EmptyListException("Provided list must contain elements");
         } else {
             for (GoodAddDTO good: goods){
+                good.setName(good.getName().strip());
+                if (good.getPrice() < 0){
+                    throw new IllegalArgumentException("Good price can't be less than 0");
+                }
                 good.setPrice(Math.round(good.getPrice() * 100.0) / 100.0);
             }
             CompletableFuture<String> future = service.addGoods(goods);
@@ -59,6 +63,12 @@ public class GoodsController {
             for (AlterGoodDTO good: goods){
                 if (good.getAmount() != null && good.getAmount() < 0){
                     throw new IllegalArgumentException("Good amount can't be less than 0");
+                }
+                if (good.getPrice() != null && good.getPrice() < 0){
+                    throw new IllegalArgumentException("Good price can't be less than 0");
+                }
+                if (good.getName() != null){
+                    good.setName(good.getName().strip());
                 }
                 if (good.getPrice() != null){
                     good.setPrice(Math.round(good.getPrice() * 100.0) / 100.0);

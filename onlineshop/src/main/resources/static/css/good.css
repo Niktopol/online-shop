@@ -52,6 +52,10 @@ body > div > button{
     align-self: flex-start;
 }
 
+.in {
+    background-color: #a2a2a8;
+}
+
 .notin {
     cursor: pointer;
     background-color: #e9e9ed;

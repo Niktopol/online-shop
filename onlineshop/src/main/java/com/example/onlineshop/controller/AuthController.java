@@ -17,6 +17,9 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<String> signUp(@RequestBody UserDTO userData){
+        userData.setName(userData.getName().strip());
+        userData.setUsername(userData.getUsername().strip());
+        userData.setPassword(userData.getPassword().strip());
         String resp = authService.signUp(userData);
         if(resp.isEmpty()){
             return ResponseEntity.status(HttpServletResponse.SC_CREATED).body("User created");

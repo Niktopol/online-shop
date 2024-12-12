@@ -16,7 +16,7 @@
             <div><input type="text" name="name" placeholder="Название" th:value="${param.name}"></div>
             <button type="submit">Найти</button>
         </form>
-        <p th:if="${error}" style="color: #af3535;">Нет соединения с сервисом. Пожалуйста, попробуйте позже</p>
+        <p th:if="${error}" style="color: #af3535; padding: 1em;">Нет соединения с сервисом. Пожалуйста, попробуйте позже</p>
         <form th:if="${(error == null) and (role == 'OWNER')}" method="post" id="goodadd">
             <p>Добавить товар:</p>
             <div>
@@ -25,11 +25,11 @@
             <div>
                 <input type="text" id="price" name="price" placeholder="Цена" required>
             </div>
-            <p th:if="${param.adderr}" th:text="'Произошла ошибка, попробуйте ещё раз'" style="color: #af3535;"></p>
-            <p th:if="${param.errnum}" th:text="'Цена должна быть числом'" style="color: #af3535;"></p>
-            <p th:if="${param.errempt}" th:text="'Пожалуйста, заполните все поля'" style="color: #af3535;"></p>
-            <p th:if="${param.errtkn}" th:text="'Товар с таким названием уже существует'" style="color: #af3535;"></p>
-            <p th:if="${param.addsucc}" th:text="'Товар добавлен'" style="color: #00ff00;"></p>
+            <p th:if="${(error == null) and (param.adderr != null) and (param.errnum == null) and (param.errempt == null) and (param.errtkn == null) and (param.addsucc == null)}" style="color: #af3535;">Произошла ошибка, попробуйте ещё раз</p>
+            <p th:if="${(error == null) and (param.adderr == null) and (param.errnum != null) and (param.errempt == null) and (param.errtkn == null) and (param.addsucc == null)}" style="color: #af3535;">Цена должна быть положительным числом</p>
+            <p th:if="${(error == null) and (param.adderr == null) and (param.errnum == null) and (param.errempt != null) and (param.errtkn == null) and (param.addsucc == null)}" style="color: #af3535;">Пожалуйста, заполните все поля</p>
+            <p th:if="${(error == null) and (param.adderr == null) and (param.errnum == null) and (param.errempt == null) and (param.errtkn != null) and (param.addsucc == null)}" style="color: #af3535;">Товар с таким названием уже существует</p>
+            <p th:if="${(error == null) and (param.adderr == null) and (param.errnum == null) and (param.errempt == null) and (param.errtkn == null) and (param.addsucc != null)}" style="color: #00ff00;">Товар добавлен</p>
             <button type="submit">Добавить</button>
         </form>
         <div th:each="item : ${goods}" class="item">
@@ -40,24 +40,7 @@
             </div>
             <button th:if="${role == 'CUSTOMER'}" th:attr="goodid=${item.id}" class="notin">Добавить в корзину</button>
         </div>
-        <!-- 
-        <div class="item">
-            <a href="dsad" class="notav">цыуевкнаегпншрощлщ</a>
-            <div class="numbers">
-                <p>Цена: ₽</p>
-                <p>Осталось: шт.</p>
-            </div>
-            <button class="notin">Добавить в корзину</button>
-        </div>
-        <div class="item">
-            <a href="dsad" >увкаемпрниотльдбжю</a>
-            <div class="numbers">
-                <p>Цена: ₽</p>
-                <p>Осталось: шт.</p>
-            </div>
-            <button class="in">В корзине</button>
-        </div>
-        -->
     </div>
+    <script th:if="${role == 'CUSTOMER'}" th:src="@{/js/cart_add.js}"></script>
 </body>
 </html>

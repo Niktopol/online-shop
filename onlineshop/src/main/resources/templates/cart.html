@@ -15,20 +15,32 @@
         <div th:each="item : ${goods}" class="item">
             <a th:href="@{'/good/' + ${item.good.id}}" th:text="${item.good.name}" th:classappend="${item.good.canBeSold} ? '' : 'notav'"></a>
             <div class="numbers">
-                <p th:text="'Цена: ' + ${item.good.price} + ' ₽'" class="price"></p>
+                <p class="price">Цена: <span th:text="${item.good.price}"></span> ₽</p>
                 <p th:text="'Осталось: ' + ${item.good.amount} + ' шт.'"></p>
             </div>
             <div class="counter">
                 <button>-</button>
-                <span th:text="${item.amount}"></span>
+                <span th:text="${item.amount}" th:attr="goodid=${item.good.id}"></span>
                 <button>+</button>
             </div>
-            <button>Удалить</button>
+            <button class="rem" th:attr="goodid=${item.good.id}">Удалить</button>
         </div>
         <h1>
             Итоговая стоимость:
             <span id="totprice">0</span> ₽
         </h1>
+        <form th:if="${(error == null) and (!goods.isEmpty())}" method="post">
+            <button type="submit">Создать заказ</button>
+            <div>
+                <label for="buyall">Покупать сколько доступно?</label>
+                <input type="checkbox" id="buyall" name="buyall">
+            </div>
+        </form>
+        <p th:if="${(error == null) and (param.errnum != null) and (param.err == null) and (param.success == null)}" style="color: #af3535; padding: 1em;">Недостаточно товаров</p>
+        <p th:if="${(error == null) and (param.errnum == null) and (param.err != null) and (param.success == null)}" style="color: #af3535; padding: 1em;">Произошла ошибка. Пожалуйста, попробуйте ещё раз</p>
+        <p th:if="${(error == null) and (param.errnum == null) and (param.err == null) and (param.success != null)}" style="color: #00ff00; padding: 1em;">Заказ создан</p>
     </div>
+    <script th:src="@{/js/cart_del.js}"></script>
+    <script th:src="@{/js/cart_num.js}"></script>
 </body>
 </html>

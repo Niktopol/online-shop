@@ -13,13 +13,15 @@
     <h1 th:text="'Найдено заказов: ' + ${numfound}"></h1>
     <div>
         <form th:if="${role == 'OWNER'}" id="search">
-            <select name="minStat">
+            <label for="minStat">От:</label>
+            <select name="minStat" id="minStat">
                 <option value="0" th:selected="${(minStat != null) and (minStat == 0)}">Созднан</option>
                 <option value="1" th:selected="${(minStat != null) and (minStat == 1)}">Собран</option>
                 <option value="2" th:selected="${(minStat != null) and (minStat == 2)}">Отправлен</option>
                 <option value="3" th:selected="${(minStat != null) and (minStat == 3)}">Прибыл</option>
             </select>
-            <select name="maxStat">
+            <label for="maxStat">До:</label>
+            <select name="maxStat" id="maxStat">
                 <option value="0" th:selected="${(maxStat != null) and (maxStat == 0)}">Созднан</option>
                 <option value="1" th:selected="${(maxStat != null) and (maxStat == 1)}">Собран</option>
                 <option value="2" th:selected="${(maxStat != null) and (maxStat == 2)}">Отправлен</option>
@@ -27,7 +29,7 @@
             </select>
             <button type="submit">Найти</button>
         </form>
-        <p th:if="${error}" style="color: #af3535;">Нет соединения с сервисом. Пожалуйста, попробуйте позже</p>
+        <p th:if="${error}" style="color: #af3535; padding: 1em;">Нет соединения с сервисом. Пожалуйста, попробуйте позже</p>
         <div th:if="${role == 'CUSTOMER'}" th:each="order : ${orders}" class="item">
             <p th:text="'Заказ №' + ${order.id}"></p>
             <div class="goods">
@@ -60,14 +62,15 @@
             </div>
             <p th:text="'Стоимость: ' + ${order.price} + ' ₽'"></p>
             <p th:text="'ID заказчика: ' + ${order.userId}"></p>
-            <select id="statuses">
+            <select class="statuses">
                 <option value="0" th:selected="${order.status == 0}">Созднан</option>
                 <option value="1" th:selected="${order.status == 1}">Собран</option>
                 <option value="2" th:selected="${order.status == 2}">Отправлен</option>
                 <option value="3" th:selected="${order.status == 3}">Прибыл</option>
             </select>
-            <button>Назначить статус</button>
+            <button th:attr="orderid=${order.id}">Назначить статус</button>
         </div>
     </div>
+    <script th:if="${role == 'OWNER'}" th:src="@{/js/order_stat.js}"></script>
 </body>
 </html>

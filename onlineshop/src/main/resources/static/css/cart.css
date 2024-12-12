@@ -108,3 +108,35 @@ body > div > h1{
     padding: 0.5em 1.5em;
     border-top: 3px solid #8f8f9d;
 }
+
+body > div > form * {
+    font-size: 20px;
+}
+
+body > div > form{
+    display: flex;
+    flex-direction: column;
+    width: 90%;
+    gap: 0.5em;
+}
+
+body > div > form > button{
+    border: 1px solid #8f8f9d;
+    border-radius: 2px;
+    background-color: #e9e9ed;
+    cursor: pointer;
+    padding: 1em;
+    width: 15em;
+}
+
+body > div > form > button:hover{
+    background-color: #d0d0d7;
+}
+
+body > div > form > button:active{
+    background-color: #b1b1b9;
+}
+
+body > div > form > div > label{
+    user-select: none;
+}

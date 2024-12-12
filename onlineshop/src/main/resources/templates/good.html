@@ -11,7 +11,7 @@
 <body>
     <header th:replace="~{fragments/header :: header(${role}, '')}"></header>
     <div>
-        <p th:if="${error}" style="font-size: 20px; color: #af3535;">Товар не найден</p>
+        <p th:if="${error}" style="font-size: 20px; color: #af3535; padding: 1em;">Товар не найден</p>
         <h1 th:if="${(error == null) and (role == 'CUSTOMER')}" th:text="${good.name}"></h1>
         <p th:if="${(error == null) and (role == 'CUSTOMER') and good.canBeSold}" id="statusval">Открыт к продаже</p>
         <p th:if="${(error == null) and (role == 'CUSTOMER') and !good.canBeSold}" id="statusval">Не продаётся</p>
@@ -35,12 +35,13 @@
                 <option value="1" th:selected="${good.canBeSold}">Открыт к продаже</option>
                 <option value="0" th:selected="${!good.canBeSold}">Не продаётся</option>
             </select>
-            <p th:if="${param.alterr}" th:text="'Произошла ошибка, попробуйте ещё раз'" style="color: #af3535;"></p>
-            <p th:if="${param.errnum}" th:text="'Цена и количество должны быть числами'" style="color: #af3535;"></p>
-            <p th:if="${param.errtkn}" th:text="'Товар с таким названием уже существует'" style="color: #af3535;"></p>
-            <p th:if="${param.addsucc}" th:text="'Товар обновлён'" style="color: #00ff00;"></p>
+            <p th:if="${(error == null) and (param.alterr != null) and (param.errnum == null) and (param.errtkn == null) and (param.addsucc == null)}" style="color: #af3535;">Произошла ошибка, попробуйте ещё раз</p>
+            <p th:if="${(error == null) and (param.alterr == null) and (param.errnum != null) and (param.errtkn == null) and (param.addsucc == null)}" style="color: #af3535;">Цена и количество должны быть положительными числами</p>
+            <p th:if="${(error == null) and (param.alterr == null) and (param.errnum == null) and (param.errtkn != null) and (param.addsucc == null)}" style="color: #af3535;">Товар с таким названием уже существует</p>
+            <p th:if="${(error == null) and (param.alterr == null) and (param.errnum == null) and (param.errtkn == null) and (param.addsucc != null)}" style="color: #00ff00;">Товар обновлён</p>
             <button type="submit">Внести изменения</button>
         </form>
     </div>
+    <script th:if="${role == 'CUSTOMER'}" th:src="@{/js/cart_add.js}"></script>
 </body>
 </html>
