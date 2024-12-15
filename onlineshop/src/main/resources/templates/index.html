@@ -13,7 +13,7 @@
     <h1 th:text="'Найдено товаров: ' + ${numfound}"></h1>
     <div>
         <form id="search">
-            <div><input type="text" name="name" placeholder="Название" th:value="${param.name}"></div>
+            <div><input type="text" name="searchname" placeholder="Название" th:value="${param.name}"></div>
             <button type="submit">Найти</button>
         </form>
         <p th:if="${error}" style="color: #af3535; padding: 1em;">Нет соединения с сервисом. Пожалуйста, попробуйте позже</p>

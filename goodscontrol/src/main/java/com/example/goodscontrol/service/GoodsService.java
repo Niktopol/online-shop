@@ -108,6 +108,7 @@ public class GoodsService extends GoodsServiceGrpc.GoodsServiceImplBase {
                 }
                 goods.add(goodOpt.get());
             } else {
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 responseObserver.onError(Status.NOT_FOUND.withDescription(
                         "List contains non-existing goods").asRuntimeException());
                 return;

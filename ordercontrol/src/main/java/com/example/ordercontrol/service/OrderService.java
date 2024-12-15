@@ -54,6 +54,7 @@ public class OrderService extends OrdersServiceGrpc.OrdersServiceImplBase {
             if (good.isPresent()){
                 cartGoods.add(new com.example.ordercontrol.model.entity.CartGood(user, good.get()));
             } else {
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Unknown good id").asRuntimeException());
                 return;
             }
@@ -87,11 +88,13 @@ public class OrderService extends OrdersServiceGrpc.OrdersServiceImplBase {
                 if (cartGood.isPresent()){
                     cartGoods.add(cartGood.get());
                 } else {
+                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                     responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(
                             "List contains good that is not in the cart").asRuntimeException());
                     return;
                 }
             } else {
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Unknown good id").asRuntimeException());
                 return;
             }
@@ -121,11 +124,13 @@ public class OrderService extends OrdersServiceGrpc.OrdersServiceImplBase {
                     cartGood.get().setAmount(info.getAmount());
                     cartGoods.add(cartGood.get());
                 } else {
+                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                     responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(
                             "List contains good that is not in the cart").asRuntimeException());
                     return;
                 }
             } else {
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Unknown good id").asRuntimeException());
                 return;
             }
@@ -230,7 +235,8 @@ public class OrderService extends OrdersServiceGrpc.OrdersServiceImplBase {
             if (request.getBuyMax()) {
                 amount = Math.min(good.getAmount(), good.getGood().getAmount());
             } else {
-                if (good.getGood().getAmount() < good.getAmount()){
+                if (good.getGood().getAmount() < good.getAmount() && good.getGood().getCanBeSold()){
+                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                     responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Not enough goods available").asRuntimeException());
                     return;
                 }
@@ -242,11 +248,12 @@ public class OrderService extends OrdersServiceGrpc.OrdersServiceImplBase {
                     goodsBought.add(good.getGood());
                     orderGoods.add(new com.example.ordercontrol.model.entity.OrderGood(
                             good.getGood(),
-                            good.getGood().getPrice() * amount,
+                            Math.round((good.getGood().getPrice() * amount) * 100.0) / 100.0,
                             amount,
                             order));
                     order.setPrice(order.getPrice() + good.getGood().getPrice() * amount);
                 } else {
+                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                     responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Not enough goods available").asRuntimeException());
                     return;
                 }
@@ -256,14 +263,12 @@ public class OrderService extends OrdersServiceGrpc.OrdersServiceImplBase {
         }
         if (!goodsBought.isEmpty()){
             try {
-                goodRepository.saveAll(goodsBought);
-                goodRepository.flush();
-                cartRepository.saveAll(cartGoods);
-                cartRepository.flush();
+                order.setPrice(Math.round((order.getPrice()) * 100.0) / 100.0);
+                goodRepository.saveAllAndFlush(goodsBought);
+                cartRepository.saveAllAndFlush(cartGoods);
                 cartRepository.deleteAll(cartGoods);
-                orderRepository.save(order);
-                orderGoodRepository.saveAll(orderGoods);
-                orderGoodRepository.flush();
+                orderRepository.saveAndFlush(order);
+                orderGoodRepository.saveAllAndFlush(orderGoods);
             } catch (OptimisticLockException e){
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 responseObserver.onError(Status.INTERNAL.withDescription(
@@ -278,6 +283,7 @@ public class OrderService extends OrdersServiceGrpc.OrdersServiceImplBase {
                     .setResponse("Order created").build());
             responseObserver.onCompleted();
         } else {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Can't create empty order").asRuntimeException());
         }
     }

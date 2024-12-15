@@ -62,13 +62,13 @@ public class PageController {
     }
 
     @GetMapping("/")
-    public String index(@RequestParam(required = false) String name, Model model) {
+    public String index(@RequestParam(required = false) String searchname, Model model) {
         model.addAttribute("role",
                 SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream().findFirst().get().toString());
-        if (name != null){
-            name = name.strip();
+        if (searchname != null){
+            searchname = searchname.strip();
             try{
-                List<GoodDTO> goods = goodsService.findGoods(name).join();
+                List<GoodDTO> goods = goodsService.findGoods(searchname).join();
                 model.addAttribute("goods", goods);
                 model.addAttribute("numfound", goods.size());
             } catch (Exception e){
